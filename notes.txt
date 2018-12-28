@@ -586,3 +586,255 @@ then section 8 = over the weekend if possible?
 
 			// client.close();
 		});
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 68; 'Updating data'
+//////////////////////////////////////////////////////////////////
+
+
+===mongodb-update.js===
+
+
+		// const MongoClient = require('mongodb').MongoClient;
+		const {MongoClient, ObjectID} = require('mongodb');
+
+		MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true }, (err, client) => {
+			if (err) {
+				return console.log('Unable to connect to MongoDB server');
+			}
+			console.log('Connected to MongoDB server');
+			const db = client.db('TodoApp');
+
+			/*
+			findOneAndUpdate(filter, update, options, callback)
+			https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
+			returns a promise
+			*/
+				/* mongodb update operators 
+				https://docs.mongodb.com/manual/reference/operator/update/
+				will work with all drivers
+				including node.js driver for mongodb
+				we want the 'SET' operators
+				$INC is another good one to increment a number value
+				*/
+
+			// // findOneAndUpdate (update item and return new document)
+			// db.collection('Todos').findOneAndUpdate({
+				// _id: new ObjectID('5c266d2e6cd2860837ca6eb7')
+			// }, {
+			// 	$set: {
+			// 		completed: true
+			// 	}
+			// }, {
+			// 	returnOriginal: false
+			// }).then((result) => {
+			// 	console.log(result);
+			// 	// includes 'value' prop in response
+			// });
+
+			// findOneAndUpdate (name and age)
+			db.collection('Users').findOneAndUpdate({
+				name: 'Jaaay'
+				// _id: new ObjectID('5c266d2e6cd2860837ca6eb7')
+			}, {
+				// $set: {
+				// 	name: 'Jaaay'
+				// },
+				$inc: {
+					// age: +1
+					age: 1
+				}
+			}, {
+				returnOriginal: false
+			}).then((result) => {
+				console.log(result);
+				// check value prop...
+			});
+
+			// client.close();
+		});
+
+		/* the real goal is you writing your own code, 
+		doing your own research, and reading your 
+		own documentation */
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 69; 'The Mongoose ORM'
+//////////////////////////////////////////////////////////////////
+
+
+Learned to use MongoDB NATIVE driver for CRUD to documents.
+
+Mongoose = ORM (object relational library) = easy to structure data.
+
+A 'todo' needs properties of types, maybe custom validation, validate user password etc. Easier with Mongoose. Possible with MongoDB native driver but better to not reinvent the wheel.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 70; 'Setting up Mongoose'
+//////////////////////////////////////////////////////////////////
+
+An ORM maps between an Object Model and a Relational Database. An ODM maps between an Object Model and a Document Database. MySQL is not an ORM, it's a Relational Database, more specifically, a SQL Database. MongoDB is not an ODM, it's a Document Database.
+
+yay! time to leave the playground folder
+
+1. connect to mdb
+2. create a model
+3. talk about what a model is
+4. save data to db using mongoose
+
+essential mongoose features
+
+$ npm i mongoose@4.5.9 --save
+
+start creating files we need for our application
+
+
+
+
+=== server/server.js === 
+
+
+
+
+
+// get everything ready to go
+
+// load in mongoose
+var mongoose = require('mongoose');
+
+// callbacks are not as simple to chain/manage/scale as promises
+// promises came from 'bluebird'
+mongoose.Promise = global.Promise;
+
+// connect to db
+// mongoose maintains connection over time
+mongoose.connect('mongodb://localhost:27017/TodoApp');
+
+// save new something - no time (ms) for db to connect
+// behind scenes mongoose waits for connection before making query
+// no need to micromanage order things happen
+
+// create a MODEL
+// collections can store anything
+// create a 'todo' model with attributes
+// so mongo knows how to store our data
+var Todo = mongoose.model('Todo', {
+	// defines the props for this model
+	// required/validators/type
+	text: {
+		type: String
+	},
+	completed: {
+		type: Boolean
+	},
+	completedAt: {
+		type: Number
+	}
+	// createdAt? No. Mongodb timestamp has that
+});
+
+
+
+
+// === ONE
+// how to CREATE an INSTANCE of a 'Todo'?
+// run as a constructor function bc creating new instance
+// takes an arg including specified props
+// var newTodo = new Todo({
+// 	text: 'Cook dinner'
+// });
+
+// how to save to database??
+/* ...creating new instance alone does not
+update mongodb database. we need to call method on 
+newTodo which is newTodo.save to save to mongodb
+database.
+returns a promise
+tack on a .then() and include error handling (connection
+failed, wrong type etc)
+*/
+
+// newTodo.save().then((doc) => {
+// 	console.log('Saved todo', doc);
+// }, (e) => {
+// 	console.log('Unable to save todo');
+// });
+// Saved todo { __v: 0, text: 'Cook dinner', _id: 5c267898311f08e9c6e454aa }
+
+
+
+
+// === TWO
+// var newTodo2 = new Todo({
+// 	text: 'Cook dinner 2',
+// 	completed: false,
+// 	// completedAt: 123 (2 minutes into year 1970)
+// 	completedAt: 
+// });
+
+// newTodo2.save().then((doc) => {
+// 	console.log('Saved todo', doc);
+// }, (e) => {
+// 	console.log('Unable to save todo');
+// });
+
+
+
+
+// === THREE
+var newTodo3 = new Todo({
+	text: 'Cook dinner 3',
+	completed: true,
+	// completedAt: 123 (2 minutes into year 1970)
+	completedAt: 123
+});
+
+newTodo3.save().then((doc) => {
+	// console.log('Saved todo', doc);
+	console.log(JSON.stringify(doc, undefined, 2));
+}, (e) => {
+	console.log('Unable to save todo');
+});

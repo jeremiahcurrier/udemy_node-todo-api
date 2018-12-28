@@ -57,13 +57,13 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true
 	// db.collection('Users').deleteMany({name: 'Jeremiah'});
 
 
-//CHALLENGE
-	db.collection('Users').findOneAndDelete({
-		_id: new ObjectID('5c255810c748f57b593a98b0')
-	}).then((result) => {
-		console.log(result);
-	});
-// success
+// //CHALLENGE
+// 	db.collection('Users').findOneAndDelete({
+// 		_id: new ObjectID('5c255810c748f57b593a98b0')
+// 	}).then((result) => {
+// 		console.log(result);
+// 	});
+// // success
 
 
 	// client.close();
