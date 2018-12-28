@@ -1,0 +1,487 @@
+//////////////////////////////////////////////////////////////////
+S: 7; P: 60; 'Installing MongoDB and Robomongo'
+//////////////////////////////////////////////////////////////////
+
+start up mongodb server (after downloading the .tgz, unzipping, moving to Users directory, renaming folder to mongo and adding new directory called mongo-data which is where we'll write to locally)
+
+// create active connection we can connect to and start manipulating data
+	
+	bin[jeremiah]-$ ./mongod --dbpath ~/mongo-data
+
+		...
+		2018-12-27T13:57:19.920-0800 I NETWORK  [initandlisten] waiting for connections on port 27017
+
+// run the mongo file
+
+	bin[jeremiah]-$ ./mongo
+
+		// connects to DB server we just started
+
+		// SET
+			> db.Todos.insert({text: 'Create a practice regimen for daily beat exercise'})
+			WriteResult({ "nInserted" : 1 })
+		// GET
+			> db.Todos.find()
+			{ "_id" : ObjectId("5c254b9ebb6c4736e30cf943"), "text" : "Create a practice regimen for daily beat exercise" }
+
+			get back a unique identifier and your text property w the value you set
+
+		// shut down the mongo command:
+			ctrl+C
+
+now ./mongo is shut off but keep ./mongod running to install one more thing 'Robomongo' which is a GUI for managing your mongo database
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 62; 'Building a NoSQL Vocabulary'
+//////////////////////////////////////////////////////////////////
+
+
+SQL vs NoSQL
+
+Database = contains sets of info.
+
+For SQL you could have a single server with a dozen databases on it. Same is true with MongoDB. No restriction to number of DBs you can setup so you can have TWO applications running on the SAME database server.
+
+SQL   = table-like structure = TABLE
+NoSQL = array-like structure = COLLECTION
+
+WEATHER APP
+	SQL: Might have a TABLE of users and temps.
+
+		Individual user? 'Row/record'
+	
+	NoSQL: Might have a COLLECTION of users and temps.
+
+		Individual user? 'Document'
+
+SQL:NoSQL
+::
+Table:Collection
+::
+Row/record:Document(json-like)
+::
+Columns:Properties
+
+
+SQL
+id | name | email       | password
+1  | john | foo@bar.com | 1234...
+
+'schema-based' i.e. the 'name'(etc) column(s) exists for ALL records, of a specific type, and guarenteed to be there for all rows/records in this table.
+
+
+NoSQL
+documents in a collection do NOT need to have all the same properties i.e. two documents can have different properties.
+
+
+SQL:column::NoSQL:field
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 63; 'Connecting to Mongo and writing data'
+//////////////////////////////////////////////////////////////////
+
+
+
+insert/update/read/delete (CRUD) our 'todo list' data in mongodb
+
+BASICS
+
+https://github.com/mongodb/node-mongodb-native
+
+
+connect to mongo db in node.js
+npm module created by mongo team
+
+
+
+
+
+node-todo-api[jeremiah]-$ node playground/mongodb-connect.js
+Connected to MongoDB server
+
+node-todo-api[jeremiah]-$ 
+
+
+
+
+
+
+playground/mongodb-connect.js
+
+
+	// mongo client to connect to mongo server
+	const MongoClient = require('mongodb').MongoClient;
+
+	// url (aws/heroku in prod) and callback post connection
+	MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true }, (err, client) => {
+		// handle errors
+		if (err) {
+			// using 'return' to prevent further code execution
+			return console.log('Unable to connect to MongoDB server');
+		}
+		console.log('Connected to MongoDB server');
+		const db = client.db('TodoApp') // 'db' reference
+
+		// insert new record/document in a collection
+		// insertOne takes an object and
+		// a callback (err, result) only 1 returned
+		db.collection('Todos').insertOne({ 
+			// obj w key value pairs for document
+			text: 'Something to do',
+			completed: false
+		}, (err, result) => {
+			if (err) {
+				return console.log('Unable to insert todo', err);
+			}
+			// result.ops = ops stores docs inserted
+			// undefined = for filter function
+			// 2 = indentation
+			console.log(JSON.stringify(result.ops, undefined, 2));
+		});
+
+		client.close(); // to close connection with mongodb server
+	});
+
+
+
+
+
+
+
+
+		// mongo client to connect to mongo server
+		const MongoClient = require('mongodb').MongoClient;
+
+		// url (aws/heroku in prod) and callback post connection
+		MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true }, (err, client) => {
+			// handle errors
+			if (err) {
+				// using 'return' to prevent further code execution
+				return console.log('Unable to connect to MongoDB server');
+			}
+			console.log('Connected to MongoDB server');
+			const db = client.db('TodoApp') // 'db' reference
+
+			// insert new record/document in a collection
+			// insertOne takes an object and
+			// a callback (err, result) only 1 returned
+			// db.collection('Todos').insertOne({ 
+			// 	// obj w key value pairs for document
+			// 	text: 'Something to do',
+			// 	completed: false
+			// }, (err, result) => {
+			// 	if (err) {
+			// 		return console.log('Unable to insert todo', err);
+			// 	}
+			// 	// result.ops = ops stores docs inserted
+			// 	// undefined = for filter function
+			// 	// 2 = indentation
+			// 	console.log(JSON.stringify(result.ops, undefined, 2));
+			// });
+
+			// Insert new doc into the Users collection (name, age, location)
+			db.collection('Users').insertOne({
+				name: 'Jeremiah',
+				age: 32,
+				location: 'San Francisco'
+			}, (err, result) => {
+				// foo
+				if (err) {
+					return console.log('Unable to insert user', err);
+				}
+				console.log(JSON.stringify(result.ops, undefined, 2));
+			});
+
+			client.close(); // to close connection with mongodb server
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 64; 'The ObjectId'
+//////////////////////////////////////////////////////////////////
+
+node-todo-api[jeremiah]-$ node playground/mongodb-connect.js
+Connected to MongoDB server
+[
+  {
+    "name": "Jeremiah",
+    "age": 32,
+    "location": "San Francisco",
+    "_id": "5c255810c748f57b593a98b0"
+  }
+]
+
+
+ObjectId
+	12 byte value
+		first 4 bytes = timestamp id was created
+		next 3 bytes = machine identifier (ensure id is unique)
+		next 2 bytes = process id
+		last 3 byte = similar to MySQL 
+
+	no need to add a created_at timestamp
+
+YOU CAN SET the ObjectId if you want to set your own id creation value
+
+
+how to access embedded timestamp of auto-generated ObjectId?
+
+		// console.log(JSON.stringify(result.ops, undefined, 2));
+		// console.log(result.ops[0]._id);
+		console.log(result.ops[0]._id.getTimestamp()); // THIS
+
+
+
+
+ES6 destructuring is a great way to make new variables set to the value of an objects property
+
+	// ES6 'object destructuring' - pull out obj props creating vars
+	var user = {name: 'Jeremiah', age: 32};
+	var {name} = user;
+	/* destructured 'user' obj pulling off 'name' property
+	creating a new 'name' variable and setting it
+	equal to whatever the value is */
+	console.log(name);
+
+
+
+
+
+// const MongoClient = require('mongodb').MongoClient;
+const {MongoClient, ObjectID} = require('mongodb');
+/* pulled out ObjectID constructor function
+which lets us create new objectId on the fly. Even
+if not using MongDB there is value is being able to
+uniquely identify things*/
+
+var obj = new ObjectID(); // create new instance of ObjectID
+console.log(obj); // technique to incorporate objId anyway we like
+
+
+
+
+playground/mongodb-connect.js
+
+		// const MongoClient = require('mongodb').MongoClient;
+		const {MongoClient, ObjectID} = require('mongodb');
+		/* pulled out ObjectID constructor function
+		which lets us create new objectId on the fly. Even
+		if not using MongDB there is value is being able to
+		uniquely identify things*/
+
+		var obj = new ObjectID(); // create new instance of ObjectID
+		console.log(obj); // technique to incorporate objId anyway we like
+
+		MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true }, (err, client) => {
+			if (err) {
+				return console.log('Unable to connect to MongoDB server');
+			}
+			console.log('Connected to MongoDB server');
+			const db = client.db('TodoApp') // 'db' reference
+			
+			// db.collection('Todos').insertOne({ 
+			// 	text: 'Something to do',
+			// 	completed: false
+			// }, (err, result) => {
+			// 	if (err) {
+			// 		return console.log('Unable to insert todo', err);
+			// 	}
+			// 	console.log(JSON.stringify(result.ops, undefined, 2));
+			// });
+
+			// db.collection('Users').insertOne({
+			// 	// _id: 123,
+			// 	name: 'Jeremiah',
+			// 	age: 32,
+			// 	location: 'San Francisco'
+			// }, (err, result) => {
+			// 	if (err) {
+			// 		return console.log('Unable to insert user', err);
+			// 	}
+			// 	// console.log(JSON.stringify(result.ops, undefined, 2));
+			// 	// console.log(result.ops[0]._id);
+			// 	console.log(result.ops[0]._id.getTimestamp());
+			// });
+
+			client.close();
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 65; 'Fetching data'
+//////////////////////////////////////////////////////////////////
+
+
+
+new file 'mondodb-find.js'
+
+		// const MongoClient = require('mongodb').MongoClient;
+		const {MongoClient, ObjectID} = require('mongodb');
+
+		MongoClient.connect('mongodb://localhost:27017/TodoApp', { useNewUrlParser: true }, (err, client) => {
+			if (err) {
+				return console.log('Unable to connect to MongoDB server');
+			}
+			console.log('Connected to MongoDB server');
+			const db = client.db('TodoApp') // 'db' reference
+			
+			// db.collection('Todos').find() // returns CURSOR
+			// db.collection('Todos').find().toArray() // returns promise
+			
+			// // fetch docs, convert to array, and print to screen
+			// db.collection('Todos').find().toArray().then((docs) => {
+			// 	console.log('Todos');
+			// 	console.log(JSON.stringify(docs, undefined, 2));
+			// }, (err) => {
+			// 	console.log('Unable to fetch todos', err);
+			// });
+			
+			// // how to query based on certain values?
+			// // specify how to query 'todos' collection
+			// db.collection('Todos').find({completed: true}).toArray().then((docs) => {
+			// 	console.log('Todos');
+			// 	console.log(JSON.stringify(docs, undefined, 2));
+			// }, (err) => {
+			// 	console.log('Unable to fetch todos', err);
+			// });
+
+			// query by '_id' value ??? (below is wrong)
+			// db.collection('Todos').find({_id: '5c2556c653e9287a39a4e73a'}).toArray().then((docs) => {
+			// 	console.log('Todos');
+			// 	console.log(JSON.stringify(docs, undefined, 2));
+			// }, (err) => {
+			// 	console.log('Unable to fetch todos', err);
+			// });
+
+			// QUERY the items by object ID
+			// NOW YOU CAN USE THE OBJECT ID CONSTRUCTOR FROM BEFORE
+			// TO QUERY BY 'OBJECTID'
+			/* query todo collection looking for any records 
+			that have an _id property equal to
+			'5c2556c653e9287a39a4e73a'
+			*/
+			// db.collection('Todos').find({
+			// 	_id: new ObjectID('5c2556c653e9287a39a4e73a')
+			// }).toArray().then((docs) => {
+			// 	console.log('Todos');
+			// 	console.log(JSON.stringify(docs, undefined, 2));
+			// }, (err) => {
+			// 	console.log('Unable to fetch todos', err);
+			// });
+
+			// // COUNT the items
+			// db.collection('Todos').find().count().then((count) => {
+			// 	console.log(`Todos count: ${count}`);
+			// }, (err) => {
+			// 	console.log('Unable to fetch todos', err);
+			// });
+
+			// query all users where name is 'Jeremiah' in Users collection
+			db.collection('Users').find({name: 'Jeremiah'}).toArray().then((users) => {
+				console.log('Users');
+				console.log(JSON.stringify(users, undefined, 2));
+			}, (err) => {
+				console.log('Unable to find any users', err);
+			});
+
+
+
+			// client.close();
+		});
+
+
+
+
+
+
+
+
+
+
+
+
