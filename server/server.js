@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+// load in the objectId from the mongoDB native driver
+var {ObjectID} = require('mongodb');
 
 var app = express();
 
@@ -28,6 +30,38 @@ app.get('/todos', (req, res) => {
 		// e
 		res.status(400).send(e);
 	});
+});
+
+// GET /todos/123123
+app.get('/todos/:id', (req, res) => {
+	var id = req.params.id;
+
+	if (!ObjectID.isValid(id)) {
+		return res.status(404).send();
+	}
+	// validate id using isValid
+		// if not stop respond 404 - send empty body .send();
+
+		Todo.findById(id).then((todo) => {
+		  if (!todo) {
+		    // return console.log('Id not found');
+				// return res.status(404).send();
+				return res.status(404).send();
+		  }
+
+		  // console.log('Todo By Id', todo);
+			res.send({todo});
+		}).catch((e) => {
+			res.status(400).send();
+		});
+	// query db using findById query todos collections
+		// s
+			// if todo - send it back
+			// if no todo - call good - no id in collection send 404 with empty body
+		// e
+			// 400 - could contain private information and send empty body back
+
+	// res.send(req.params);
 });
 
 app.listen(3000, () => {

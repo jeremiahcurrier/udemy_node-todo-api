@@ -1375,3 +1375,362 @@ server.js
 		        })
 
 		      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					//////////////////////////////////////////////////////////////////
+					S: 7; P: 75; 'List Resources GET /todos'
+					//////////////////////////////////////////////////////////////////
+
+
+					server.js
+
+					      var express = require('express');
+					      var bodyParser = require('body-parser');
+
+					      var {mongoose} = require('./db/mongoose');
+					      var {Todo} = require('./models/todo');
+					      var {User} = require('./models/user');
+
+					      var app = express();
+
+					      app.use(bodyParser.json());
+
+					      app.post('/todos', (req, res) => {
+					      	var todo = new Todo({
+					      		text: req.body.text
+					      	});
+
+					      	todo.save().then((doc) => {
+					      		res.send(doc);
+					      	}, (e) => {
+					      		res.status(400).send(e);
+					      	});
+					      });
+
+					      app.get('/todos', (req, res) => {
+					      	Todo.find().then((todos) => {
+					      		res.send({todos}); // create an object so you can add properties later on VS sending an Array back. More flexible future
+					      	}, (e) => {
+					      		// e
+					      		res.status(400).send(e);
+					      	});
+					      });
+
+					      app.listen(3000, () => {
+					      	console.log('Started on port 3000');;
+					      });
+
+					      module.exports = {app};
+
+
+
+					server.test.js
+
+
+					      // require supertest and expect - nodemon and mocha do not need to be required that is not how they are used
+					      const expect = require('expect');
+					      const request = require('supertest');
+					      // local files
+					      const {app} = require('./../server');
+					      const {Todo} = require('./../models/todo');
+
+
+					      // ADD SEED DATA
+					      // dummy todos
+					      const todos = [{
+					        text: 'First test todo'
+					      }, {
+					        text: 'Second test todo'
+					      }];
+
+
+					      // add TESTING LIFECYCLE METHOD
+					      beforeEach((done) => {
+					        // run before every test case
+					        // Todo.remove({}).then(() => done()); // wipe out our todos
+					        // insertMany (takes array and inserts into collection)
+					        Todo.remove({}).then(() => {
+					          return Todo.insertMany(todos);
+					        }).then(() => done());
+					      });
+
+					      // group all routes
+					      describe('POST /todos', () => {
+					        it('should create a new todo', (done) => {
+					          var text = 'Test todo text';
+
+					          request(app)
+					            .post('/todos')
+					            .send({text})
+					            .expect(200)
+					            .expect((res) => {
+					              expect(res.body.text).toBe(text);
+					            })
+					            .end((err, res) => {
+					              // handle any errors that occured above &&
+					              if (err) {
+					                return done(err); // return result to stop f(x) execution
+					              }
+
+					              // request to db fetch todos verifying one was added
+					              Todo.find({text}).then((todos) => {
+					                expect(todos.length).toBe(1);
+					                expect(todos[0].text).toBe(text);
+					                done();
+					              }).catch((e) => done(e));
+					            });
+					        });
+
+					      // verify todo does not get created if we send bad data expect 400 with error obj
+					        it('should not create todo with invalid body data', (done) => {
+					          request(app)
+					            .post('/todos')
+					            .send({})
+					            .expect(400)
+					            .end((err, res) => {
+					              if (err) {
+					                return done(err);
+					              }
+
+					              Todo.find().then((todos) => {
+					                expect(todos.length).toBe(2);
+					                done();
+					              }).catch((e) => done(e));
+					            });
+					        })
+
+					      });
+
+					      describe('GET /todos', () => {
+					        it('should get all todos', (done) => {
+					          request(app)
+					            .get('/todos')
+					            .expect(200)
+					            .expect((res) => {
+					              expect(res.body.todos.length).toBe(2);
+					            })
+					            .end(done);
+					        });
+					      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 76; 'Mongoose Queries and ID Validation'
+//////////////////////////////////////////////////////////////////
+
+								/playground/mongoose-queries.js
+
+								    // load in the objectId from the mongoDB native driver
+								    const {ObjectID} = require('mongodb');
+
+								    const {mongoose} = require('./../server/db/mongoose');
+								    const {Todo} = require('./../server/models/todo');
+								    const {User} = require('./../server/models/user');
+
+								    // var id = '5c32654552234b473b76fd1311';
+
+								    // if (!ObjectID.isValid(id)) {
+								    //   console.log('ID not valid');
+								    // }
+
+								    // // returns ARRAY
+								    // Todo.find({
+								    //   _id: id // mongoose take this string > convert to obj id > run query
+								    // }).then((todos) => {
+								    //   console.log('Todos', todos);
+								    // });
+								    //
+								    // // first matching doc from mongo
+								    // // returns OBJECT
+								    // Todo.findOne({
+								    //   _id: id // mongoose take this string > convert to obj id > run query
+								    // }).then((todo) => {
+								    //   console.log('Todo', todo);
+								    // });
+
+								    // Todo.findById(id).then((todo) => {
+								    //   if (!todo) {
+								    //     return console.log('Id not found');
+								    //   }
+								    //   console.log('Todo By Id', todo);
+								    // }).catch((e) => console.log(e));
+
+
+								    User.findById('5c31558e9e651b4307cef9af').then((user) => {
+								      if (!user) {
+								        return console.log('User not found');
+								      }
+								      // pretty print to console
+								      console.log(JSON.stringify(user, undefined, 2));
+								    }, (e) => {
+								      console.log(e);
+								    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+										//////////////////////////////////////////////////////////////////
+										S: 7; P: 78; 'Getting an individual resource - GET /todos/:id'
+										//////////////////////////////////////////////////////////////////
+
+
+										server.js
+
+										    var express = require('express');
+										    var bodyParser = require('body-parser');
+
+										    var {mongoose} = require('./db/mongoose');
+										    var {Todo} = require('./models/todo');
+										    var {User} = require('./models/user');
+										    // load in the objectId from the mongoDB native driver
+										    var {ObjectID} = require('mongodb');
+
+										    var app = express();
+
+										    app.use(bodyParser.json());
+
+										    app.post('/todos', (req, res) => {
+										    	var todo = new Todo({
+										    		text: req.body.text
+										    	});
+
+										    	todo.save().then((doc) => {
+										    		res.send(doc);
+										    	}, (e) => {
+										    		res.status(400).send(e);
+										    	});
+										    });
+
+										    app.get('/todos', (req, res) => {
+										    	Todo.find().then((todos) => {
+										    		res.send({todos}); // create an object so you can add properties later on VS sending an Array back. More flexible future
+										    	}, (e) => {
+										    		// e
+										    		res.status(400).send(e);
+										    	});
+										    });
+
+										    // GET /todos/123123
+										    app.get('/todos/:id', (req, res) => {
+										    	var id = req.params.id;
+
+										    	if (!ObjectID.isValid(id)) {
+										    		return res.status(404).send();
+										    	}
+										    	// validate id using isValid
+										    		// if not stop respond 404 - send empty body .send();
+
+										    		Todo.findById(id).then((todo) => {
+										    		  if (!todo) {
+										    		    // return console.log('Id not found');
+										    				// return res.status(404).send();
+										    				return res.status(404).send();
+										    		  }
+
+										    		  // console.log('Todo By Id', todo);
+										    			res.send({todo});
+										    		}).catch((e) => {
+										    			res.status(400).send();
+										    		});
+										    	// query db using findById query todos collections
+										    		// s
+										    			// if todo - send it back
+										    			// if no todo - call good - no id in collection send 404 with empty body
+										    		// e
+										    			// 400 - could contain private information and send empty body back
+
+										    	// res.send(req.params);
+										    });
+
+										    app.listen(3000, () => {
+										    	console.log('Started on port 3000');;
+										    });
+
+										    module.exports = {app};
