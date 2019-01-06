@@ -1,6 +1,8 @@
 // require supertest and expect - nodemon and mocha do not need to be required that is not how they are used
 const expect = require('expect');
 const request = require('supertest');
+// load in the objectId from the mongoDB native driver
+const {ObjectID} = require('mongodb');
 // local files
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
@@ -9,8 +11,10 @@ const {Todo} = require('./../models/todo');
 // ADD SEED DATA
 // dummy todos
 const todos = [{
+  _id: new ObjectID(),
   text: 'First test todo'
 }, {
+  _id: new ObjectID(),
   text: 'Second test todo'
 }];
 
@@ -81,5 +85,36 @@ describe('GET /todos', () => {
         expect(res.body.todos.length).toBe(2);
       })
       .end(done);
+  });
+});
+
+describe('GET /todos/:id', () => {
+  it('should return todo doc', (done) => {
+    request(app)
+      // .get('/todos/id')
+      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todos[0].text);
+      })
+      .end(done);
+  });
+
+  it('should return a 404 if todo not found', (done) => {
+    // make request use real objectId using toHexString method
+    var hexId = new ObjectID().toHexString();
+    // make sure you get a 404 back
+    request(app)
+      .get(`/todos/${hexId}`)
+        .expect(404)
+        .end(done);
+  });
+
+  it('should return 404 for non-object ids', (done) => {
+    // /todos/123 valid url but convert to object id fail get 404 back
+    request(app)
+      .get('/todos/123abc')
+        .expect(404)
+        .end(done);
   });
 });
