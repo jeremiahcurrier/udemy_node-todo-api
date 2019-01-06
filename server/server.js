@@ -1,98 +1,32 @@
-// get everything ready to go
+var express = require('express');
+var bodyParser = require('body-parser');
 
-// load in mongoose
-var mongoose = require('mongoose');
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 
-// callbacks are not as simple to chain/manage/scale as promises
-// promises came from 'bluebird'
-mongoose.Promise = global.Promise;
+var app = express();
 
-// connect to db
-// mongoose maintains connection over time
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+// configure middleware
+app.use(bodyParser.json()); // can now send JSON to express application
 
-// save new something - no time (ms) for db to connect
-// behind scenes mongoose waits for connection before making query
-// no need to micromanage order things happen
+app.post('/todos', (req, res) => {
+	// get body data sent by the client (Slack Events API could be client)
+	// console.log(req.body);
+	var todo = new Todo({
+		text: req.body.text
+	});
 
-// create a MODEL
-// collections can store anything
-// create a 'todo' model with attributes
-// so mongo knows how to store our data
-var Todo = mongoose.model('Todo', {
-	// defines the props for this model
-	// required/validators/type
-	text: {
-		type: String
-	},
-	completed: {
-		type: Boolean
-	},
-	completedAt: {
-		type: Number
-	}
-	// createdAt? No. Mongodb timestamp has that
+	todo.save().then((doc) => { // save todo to db
+		// s
+		res.send(doc);
+	}, (e) => {
+		// e
+		res.status(400).send(e);
+		// https://httpstatuses.com/400
+	});
 });
 
-
-
-
-// === ONE
-// how to CREATE an INSTANCE of a 'Todo'?
-// run as a constructor function bc creating new instance
-// takes an arg including specified props
-// var newTodo = new Todo({
-// 	text: 'Cook dinner'
-// });
-
-// how to save to database??
-/* ...creating new instance alone does not
-update mongodb database. we need to call method on 
-newTodo which is newTodo.save to save to mongodb
-database.
-returns a promise
-tack on a .then() and include error handling (connection
-failed, wrong type etc)
-*/
-
-// newTodo.save().then((doc) => {
-// 	console.log('Saved todo', doc);
-// }, (e) => {
-// 	console.log('Unable to save todo');
-// });
-// Saved todo { __v: 0, text: 'Cook dinner', _id: 5c267898311f08e9c6e454aa }
-
-
-
-
-// === TWO
-// var newTodo2 = new Todo({
-// 	text: 'Cook dinner 2',
-// 	completed: false,
-// 	// completedAt: 123 (2 minutes into year 1970)
-// 	completedAt: 
-// });
-
-// newTodo2.save().then((doc) => {
-// 	console.log('Saved todo', doc);
-// }, (e) => {
-// 	console.log('Unable to save todo');
-// });
-
-
-
-
-// === THREE
-var newTodo3 = new Todo({
-	text: 'Cook dinner 3',
-	completed: true,
-	// completedAt: 123 (2 minutes into year 1970)
-	completedAt: 123
-});
-
-newTodo3.save().then((doc) => {
-	// console.log('Saved todo', doc);
-	console.log(JSON.stringify(doc, undefined, 2));
-}, (e) => {
-	console.log('Unable to save todo');
+app.listen(3000, () => {
+	console.log('Started on port 3000');;
 });

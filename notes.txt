@@ -5,7 +5,11 @@ S: 7; P: 60; 'Installing MongoDB and Robomongo'
 start up mongodb server (after downloading the .tgz, unzipping, moving to Users directory, renaming folder to mongo and adding new directory called mongo-data which is where we'll write to locally)
 
 // create active connection we can connect to and start manipulating data
-	
+
+cd Users/Jeremiah/mongo/bin
+
+users > jeremiah > mongo > bin > start server
+
 	bin[jeremiah]-$ ./mongod --dbpath ~/mongo-data
 
 		...
@@ -72,7 +76,7 @@ WEATHER APP
 	SQL: Might have a TABLE of users and temps.
 
 		Individual user? 'Row/record'
-	
+
 	NoSQL: Might have a COLLECTION of users and temps.
 
 		Individual user? 'Document'
@@ -143,7 +147,7 @@ npm module created by mongo team
 node-todo-api[jeremiah]-$ node playground/mongodb-connect.js
 Connected to MongoDB server
 
-node-todo-api[jeremiah]-$ 
+node-todo-api[jeremiah]-$
 
 
 
@@ -169,7 +173,7 @@ playground/mongodb-connect.js
 		// insert new record/document in a collection
 		// insertOne takes an object and
 		// a callback (err, result) only 1 returned
-		db.collection('Todos').insertOne({ 
+		db.collection('Todos').insertOne({
 			// obj w key value pairs for document
 			text: 'Something to do',
 			completed: false
@@ -209,7 +213,7 @@ playground/mongodb-connect.js
 			// insert new record/document in a collection
 			// insertOne takes an object and
 			// a callback (err, result) only 1 returned
-			// db.collection('Todos').insertOne({ 
+			// db.collection('Todos').insertOne({
 			// 	// obj w key value pairs for document
 			// 	text: 'Something to do',
 			// 	completed: false
@@ -283,7 +287,7 @@ ObjectId
 		first 4 bytes = timestamp id was created
 		next 3 bytes = machine identifier (ensure id is unique)
 		next 2 bytes = process id
-		last 3 byte = similar to MySQL 
+		last 3 byte = similar to MySQL
 
 	no need to add a created_at timestamp
 
@@ -344,8 +348,8 @@ playground/mongodb-connect.js
 			}
 			console.log('Connected to MongoDB server');
 			const db = client.db('TodoApp') // 'db' reference
-			
-			// db.collection('Todos').insertOne({ 
+
+			// db.collection('Todos').insertOne({
 			// 	text: 'Something to do',
 			// 	completed: false
 			// }, (err, result) => {
@@ -409,10 +413,10 @@ new file 'mondodb-find.js'
 			}
 			console.log('Connected to MongoDB server');
 			const db = client.db('TodoApp') // 'db' reference
-			
+
 			// db.collection('Todos').find() // returns CURSOR
 			// db.collection('Todos').find().toArray() // returns promise
-			
+
 			// // fetch docs, convert to array, and print to screen
 			// db.collection('Todos').find().toArray().then((docs) => {
 			// 	console.log('Todos');
@@ -420,7 +424,7 @@ new file 'mondodb-find.js'
 			// }, (err) => {
 			// 	console.log('Unable to fetch todos', err);
 			// });
-			
+
 			// // how to query based on certain values?
 			// // specify how to query 'todos' collection
 			// db.collection('Todos').find({completed: true}).toArray().then((docs) => {
@@ -441,7 +445,7 @@ new file 'mondodb-find.js'
 			// QUERY the items by object ID
 			// NOW YOU CAN USE THE OBJECT ID CONSTRUCTOR FROM BEFORE
 			// TO QUERY BY 'OBJECTID'
-			/* query todo collection looking for any records 
+			/* query todo collection looking for any records
 			that have an _id property equal to
 			'5c2556c653e9287a39a4e73a'
 			*/
@@ -540,7 +544,7 @@ then section 8 = over the weekend if possible?
 			// 	properties
 			// 	*/
 			// });
-			
+
 			// // deleteOne (1 doc)
 			// db.collection('Todos').deleteOne({text: 'Eat lunch'}).then((result) => {
 			// 	// if (err) {
@@ -550,7 +554,7 @@ then section 8 = over the weekend if possible?
 			// 	/* 'result' obj includes 'n' and 'ok'
 			// 	properties */
 			// });
-			
+
 			// // findOneAndDelete (remove item and return value/obj back)
 			// db.collection('Todos').findOneAndDelete({completed: false}).then((result) => {
 			// 	// if (err) {
@@ -570,7 +574,7 @@ then section 8 = over the weekend if possible?
 			// 	console.log(result);
 			// });
 		// success
-		// another option	
+		// another option
 			// // // deleteMany (many documents)
 			// db.collection('Users').deleteMany({name: 'Jeremiah'});
 
@@ -621,7 +625,7 @@ S: 7; P: 68; 'Updating data'
 			https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
 			returns a promise
 			*/
-				/* mongodb update operators 
+				/* mongodb update operators
 				https://docs.mongodb.com/manual/reference/operator/update/
 				will work with all drivers
 				including node.js driver for mongodb
@@ -665,8 +669,8 @@ S: 7; P: 68; 'Updating data'
 			// client.close();
 		});
 
-		/* the real goal is you writing your own code, 
-		doing your own research, and reading your 
+		/* the real goal is you writing your own code,
+		doing your own research, and reading your
 		own documentation */
 
 
@@ -734,7 +738,7 @@ start creating files we need for our application
 
 
 
-=== server/server.js === 
+=== server/server.js ===
 
 
 
@@ -789,7 +793,7 @@ var Todo = mongoose.model('Todo', {
 
 // how to save to database??
 /* ...creating new instance alone does not
-update mongodb database. we need to call method on 
+update mongodb database. we need to call method on
 newTodo which is newTodo.save to save to mongodb
 database.
 returns a promise
@@ -812,7 +816,7 @@ failed, wrong type etc)
 // 	text: 'Cook dinner 2',
 // 	completed: false,
 // 	// completedAt: 123 (2 minutes into year 1970)
-// 	completedAt: 
+// 	completedAt:
 // });
 
 // newTodo2.save().then((doc) => {
@@ -838,3 +842,402 @@ newTodo3.save().then((doc) => {
 }, (e) => {
 	console.log('Unable to save todo');
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 71; 'Validators, Types, and Defaults'
+//////////////////////////////////////////////////////////////////
+
+another application could be a web app, a mobile, or another server (like your slack app you built hosted in a clients private cloud infrastructure running on AWS rails)
+
+server/server.js
+
+    // get everything ready to go
+
+    // load in mongoose
+    var mongoose = require('mongoose');
+
+    // callbacks are not as simple to chain/manage/scale as promises
+    // promises came from 'bluebird'
+    mongoose.Promise = global.Promise;
+
+    // connect to db
+    // mongoose maintains connection over time
+    mongoose.connect('mongodb://localhost:27017/TodoApp');
+
+    // save new something - no time (ms) for db to connect
+    // behind scenes mongoose waits for connection before making query
+    // no need to micromanage order things happen
+
+    // create a MODEL
+    // collections can store anything
+    // create a 'todo' model with attributes
+    // so mongo knows how to store our data
+    var Todo = mongoose.model('Todo', {
+    	// defines the props for this model
+    	// required/validators/type
+    	text: {
+    		type: String,
+    		required: true
+    	},
+    	completed: {
+    		type: Boolean
+    	},
+    	completedAt: {
+    		type: Number
+    	}
+    	// createdAt? No. Mongodb timestamp has that
+    });
+
+
+
+
+    // === ONE
+    // how to CREATE an INSTANCE of a 'Todo'?
+    // run as a constructor function bc creating new instance
+    // takes an arg including specified props
+    // var newTodo = new Todo({
+    // 	text: 'Cook dinner'
+    // });
+
+    // how to save to database??
+    /* ...creating new instance alone does not
+    update mongodb database. we need to call method on
+    newTodo which is newTodo.save to save to mongodb
+    database.
+    returns a promise
+    tack on a .then() and include error handling (connection
+    failed, wrong type etc)
+    */
+
+    // newTodo.save().then((doc) => {
+    // 	console.log('Saved todo', doc);
+    // }, (e) => {
+    // 	console.log('Unable to save todo');
+    // });
+    // Saved todo { __v: 0, text: 'Cook dinner', _id: 5c267898311f08e9c6e454aa }
+
+
+
+
+    // === TWO
+    // var newTodo2 = new Todo({
+    // 	text: 'Cook dinner 2',
+    // 	completed: false,
+    // 	// completedAt: 123 (2 minutes into year 1970)
+    // 	completedAt:
+    // });
+
+    // newTodo2.save().then((doc) => {
+    // 	console.log('Saved todo', doc);
+    // }, (e) => {
+    // 	console.log('Unable to save todo');
+    // });
+
+    // === THREE
+    var newTodo3 = new Todo({
+    	text: 'Cook dinner 3',
+    	completed: true,
+    	// completedAt: 123 (2 minutes into year 1970)
+    	completedAt: 123
+    });
+
+    newTodo3.save().then((doc) => {
+    	// console.log('Saved todo', doc);
+    	console.log(JSON.stringify(doc, undefined, 2));
+    }, (e) => {
+    	console.log('Unable to save todo');
+    });
+
+
+
+
+-
+
+
+
+
+
+server.js
+
+    var mongoose = require('mongoose');
+
+    mongoose.Promise = global.Promise;
+    mongoose.connect('mongodb://localhost:27017/TodoApp');
+
+    var Todo = mongoose.model('Todo', {
+    	text: {
+    		type: String,
+    		required: true,
+    		minLength: 1,
+    		trim: true
+    	},
+    	completed: {
+    		type: Boolean,
+    		default: false
+    	},
+    	completedAt: {
+    		type: Number,
+    		default: null
+    	}
+    });
+
+    var User = mongoose.model('User', {
+    	email: {
+    		type: String,
+    		required: true,
+    		trim: true,
+    		minLength: 1
+    	}
+    });
+
+    // var newTodo = new Todo({
+    // 	text: 'Cook dinner'
+    // });
+
+    // newTodo.save().then((doc) => {
+    // 	console.log('Saved todo', doc);
+    // }, (e) => {
+    // 	console.log('Unable to save todo');
+    // });
+
+    // var otherTodo = new Todo({
+    // 	text: 'Something to do'// if you put a number or boolean mongoose will turn either into a string
+    // });
+
+
+    // otherTodo.save().then((doc) => {
+    // 	console.log(JSON.stringify(doc, undefined, 2));
+    // }, (e) => {
+    // 	console.log('Unable to save', e);
+    // });
+
+    // User
+    // email - require it - trim it - set type string - set minlengh 1
+
+    var user = new User({
+    	email: 'hello@world.com'
+    });
+
+    user.save().then((doc) => {
+    	console.log('User saved', doc);
+    }, (e) => {
+    	console.log('Unable to save user', e);
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 73; 'Resource creation endpoint - POST /todos'
+//////////////////////////////////////////////////////////////////
+
+only thing that should be in server.js is our Express route handlers
+
+
+
+
+CURRENT server.js
+
+        var mongoose = require('mongoose');
+
+        mongoose.Promise = global.Promise;
+        mongoose.connect('mongodb://localhost:27017/TodoApp');
+
+        var Todo = mongoose.model('Todo', {
+        	text: {
+        		type: String,
+        		required: true,
+        		minLength: 1,
+        		trim: true
+        	},
+        	completed: {
+        		type: Boolean,
+        		default: false
+        	},
+        	completedAt: {
+        		type: Number,
+        		default: null
+        	}
+        });
+
+        var User = mongoose.model('User', {
+        	email: {
+        		type: String,
+        		required: true,
+        		trim: true,
+        		minLength: 1
+        	}
+        });
+
+        // var newTodo = new Todo({
+        // 	text: 'Cook dinner'
+        // });
+
+        // newTodo.save().then((doc) => {
+        // 	console.log('Saved todo', doc);
+        // }, (e) => {
+        // 	console.log('Unable to save todo');
+        // });
+
+        // var otherTodo = new Todo({
+        // 	text: 'Something to do'// if you put a number or boolean mongoose will turn either into a string
+        // });
+
+
+        // otherTodo.save().then((doc) => {
+        // 	console.log(JSON.stringify(doc, undefined, 2));
+        // }, (e) => {
+        // 	console.log('Unable to save', e);
+        // });
+
+        // User
+        // email - require it - trim it - set type string - set minlengh 1
+
+        var user = new User({
+        	email: 'hello@world.com'
+        });
+
+        user.save().then((doc) => {
+        	console.log('User saved', doc);
+        }, (e) => {
+        	console.log('Unable to save user', e);
+        });
+
+
+
+UPDATED server.js
+
+
+    /* pull off 'mongoose' property using es6 destructuring
+    creating a local variable called 'mongoose' equal to
+    the 'mongoose' property on the object and that object
+    is the return result from requiring the file
+    ./db/mongoose.js */
+    var {mongoose} = require('./db/mongoose');
+
+    //
+    // var user = new User({
+    // 	email: 'hello@world.com'
+    // });
+    //
+    // user.save().then((doc) => {
+    // 	console.log('User saved', doc);
+    // }, (e) => {
+    // 	console.log('Unable to save user', e);
+    // });
+
+
+
+UPDATED UPDATED server.js
+
+    var {mongoose} = require('./db/mongoose');
+    var {Todo} = require('./models/todo');
+    var {User} = require('./models/user');
+
+body-parser = lets us send JSON of response string body and turns into js obj
+
+npm i express body-parser --save
+
+
+
+
+
+
+// library imports
+var express = require('express'); // store express library
+var bodyParser = require('body-parser'); // store body-parser library
+// local imports
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
+
+var app = express();
+
+// configure routes
+/* POST route (new todo/user send JSON obj to server w text property and server will get text property create model with other properties and send todo/user back to client) */
+app.post('/todos', (req, res) => {
+	//foo
+});
+
+app.listen(3000, () => {
+	console.log('Started on port 3000');;
+});
+
+
+
+
+
+
+
+server.js
+
+
+
+    var express = require('express');
+    var bodyParser = require('body-parser');
+
+    var {mongoose} = require('./db/mongoose');
+    var {Todo} = require('./models/todo');
+    var {User} = require('./models/user');
+
+    var app = express();
+
+    // configure middleware
+    app.use(bodyParser.json()); // can now send JSON to express application
+
+    app.post('/todos', (req, res) => {
+    	// get body data sent by the client (Slack Events API could be client)
+    	// console.log(req.body);
+    	var todo = new Todo({
+    		text: req.body.text
+    	});
+
+    	todo.save().then((doc) => { // save todo to db
+    		// s
+    		res.send(doc);
+    	}, (e) => {
+    		// e
+    		res.status(400).send(e);
+    		// https://httpstatuses.com/400
+    	});
+    });
+
+    app.listen(3000, () => {
+    	console.log('Started on port 3000');;
+    });
