@@ -345,3 +345,183 @@ package.json
   //   // data was changed, do not trust, likely incorrect/malicious
   //   console.log(('Data was changed. Do not trust.'));
   // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 90; 'Generating Auth Tokens and Setting Headers'
+//////////////////////////////////////////////////////////////////
+
+  2 methods to explore in this video
+  model methods = upper-case User object (.findByToken is custom model method)
+  instance methods = called on individual user (requires individual user document)
+
+  User = model method
+  user = instance method
+
+
+  User.findByToken
+
+
+
+  server/models/user.js
+
+    const mongoose = require('mongoose');
+    const validator = require('validator');
+    const jwt = require('jsonwebtoken');
+    const _ = require('lodash');
+
+    var UserSchema = new mongoose.Schema({
+    	email: {
+    		type: String,
+    		required: true,
+    		trim: true,
+    		minLength: 1,
+    		unique: true,
+    		validate: {
+    			validator: validator.isEmail,
+    			message: '{VALUE} is not a valid email'
+    		}
+    	},
+    	password: {
+    		type: String,
+    		require: true,
+    		minLength: 6
+    	},
+    	tokens: [{
+    		access: {
+    			type: String,
+    			required: true
+    		},
+    		token: {
+    			type: String,
+    			require: true
+    		}
+    	}]
+    });
+
+    UserSchema.methods.toJSON = function() {
+    	var user = this;
+    	var userObject = user.toObject();
+
+    	return _.pick(userObject, ['_id', 'email']);
+    };
+
+    // arrow functions do not bind a 'this' keyword which we need in this case, why? because 'this' stores the individual document
+    UserSchema.methods.generateAuthToken = function () {
+    	var user = this;
+    	var access = 'auth';
+    	var token = jwt.sign({_id: user._id.toHexString(), access}, 'secretvalue').toString();
+
+    	// user.tokens.push({access, token});
+    	user.tokens = user.tokens.concat([{access, token}]); // works in wider range of mongodb versions
+
+    	// // need to save
+    	// user.save().then(() => {
+    	// 	// success
+    	// 	return token;
+    	// }).then((token) => {
+    	// 	// this happens in server.js
+    	// })
+
+    	// in order to allow server.js to chain onto the promise we'll return interval
+    	return user.save().then(() => {
+    		return token;
+    	});
+    };
+
+    var User = mongoose.model('User', UserSchema);
+
+    module.exports = {User};
+
+
+
+
+  playground/hashing.js
+
+    // grab prop off require return result
+    const {SHA256} = require('crypto-js');
+    const jwt = require('jsonwebtoken');
+
+
+    // https://jwt.io/
+
+    // create token
+    // verify it
+
+    var data = {
+      id: 10
+    };
+    var token = jwt.sign(data, '123abc');
+    console.log(token);
+    // jwt.sign // takes obj (data w user id), signs it, returns token value
+    // jwt.verify // takes token + secret to ensure data not manipulated (shared secret)
+    // var decoded = jwt.verify(token + '1', '123abc');
+    // var decoded = jwt.verify(token, '123abcc');
+    var decoded = jwt.verify(token, '123abc');
+    console.log('decoded', decoded);
+
+
+
+
+
+    // var message = 'I am user number 3';
+    // var hash = SHA256(message).toString();
+    //
+    // console.log(`Message: ${message}`);
+    // console.log(`Hash: ${hash}`);
+
+    // // JWT concept
+    // var data = {
+    //   id: 4
+    // };
+    // // var token = {
+    // //   data,
+    // //   hash: SHA256(JSON.stringify(data)).toString()
+    // // }
+    // // token not foolproof... let's say user changes the data.id property to 5 all they have to do is re-hash that data > add it on to the 'hash' property > send the 'token' back and they technically could trick us... HOW TO PREVENT THIS?
+    // // 'salt the hash' === add something onto the hash that's unique that changes the value
+    // // password + somesecret
+    //
+    // var token = {
+    //   data,
+    //   hash: SHA256(JSON.stringify(data) + 'somesecret').toString() // somesecret is only on the server...
+    // }
+    //
+    // // mocks up a hash manipulation
+    // // token.data.id = 5;
+    // // token.hash = SHA256(JSON.stringify(token.data)).toString();
+    //
+    // var resultHash = SHA256(JSON.stringify(token.data) + 'somesecret').toString();
+    //
+    // if (resultHash === token.hash) {
+    //   // data not manipulated bc of the salt
+    //   console.log('Data was not changed');
+    // } else {
+    //   // data was changed, do not trust, likely incorrect/malicious
+    //   console.log(('Data was changed. Do not trust.'));
+    // }
