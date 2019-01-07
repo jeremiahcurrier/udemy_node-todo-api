@@ -875,3 +875,89 @@ server/models/user.js
   var User = mongoose.model('User', UserSchema);
 
   module.exports = {User};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 92; 'Hashing passwords'
+//////////////////////////////////////////////////////////////////
+
+How to hash a user's password before saving it to the database:
+
+Hash it, salt it, store it in the database
+
+BCRYPT (built in salting)
+
+
+mongoose middleware lets you run certain code BEFORE or AFTER an PREVENT
+i.e. run code before saving document (ensure hashedPassword is in place)
+
+https://mongoosejs.com/docs/middleware.html
+
+
+playground/hashing.js
+
+  // grab prop off require return result
+  const {SHA256} = require('crypto-js');
+  const jwt = require('jsonwebtoken');
+  const bcrypt = require('bcryptjs');
+
+  var password = '123abc!';
+
+  // // hash a password using bcrypt
+  // bcrypt.genSalt(10, (err, salt) => {
+  //   bcrypt.hash(password, salt, (err, hash) => {
+  //     console.log(hash);
+  //   });
+  // });
+
+  // how to compare if the hash = plain text password (when someone logs in)
+  var hashedPassword = '$2a$10$NGZVeZ2kSczQOE6e/HlSSuuNIn1YfH5OJ3FQ0Pb9YNEvAT7U1ULh2';
+
+  bcrypt.compare('password', hashedPassword, (err, res) => {
+    // res is true or false
+    console.log(res);
+  });
+
+
+server/models/user.js
+
+...
+  UserSchema.pre('save', function(next) { // save is Mongoose document save event
+  	// do something
+  	var user = this;
+  	// now we can check if password was modified
+  	if (user.isModified('password')) {
+  		// hash the password using bcrypt if not modified
+  		bcrypt.genSalt(10, (err, salt) => {
+  			// user.password
+  		  bcrypt.hash(user.password, salt, (err, hash) => {
+  				// user.password = hash;
+  				user.password = hash;
+  				// next() to complete middleware and save document
+  				next();
+  		  });
+  		});
+
+  	} else {
+  		next();
+  	}
+  });
+
+  var User = mongoose.model('User', UserSchema);
+
+  module.exports = {User};
