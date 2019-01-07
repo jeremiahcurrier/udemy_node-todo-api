@@ -1916,147 +1916,147 @@ S: 7; P: 79; 'Testing GET /todos/:id'
 
 
 
-												//////////////////////////////////////////////////////////////////
-												S: 7; P: 80; 'Deploy API to Heroku'
-												//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+S: 7; P: 80; 'Deploy API to Heroku'
+//////////////////////////////////////////////////////////////////
 
 
 
-												mongoose-queries.js
+mongoose-queries.js
 
-												    // load in the objectId from the mongoDB native driver
-												    const {ObjectID} = require('mongodb');
+    // load in the objectId from the mongoDB native driver
+    const {ObjectID} = require('mongodb');
 
-												    const {mongoose} = require('./../server/db/mongoose');
-												    const {Todo} = require('./../server/models/todo');
-												    const {User} = require('./../server/models/user');
+    const {mongoose} = require('./../server/db/mongoose');
+    const {Todo} = require('./../server/models/todo');
+    const {User} = require('./../server/models/user');
 
-												    // var id = '5c32654552234b473b76fd1311';
+    // var id = '5c32654552234b473b76fd1311';
 
-												    // if (!ObjectID.isValid(id)) {
-												    //   console.log('ID not valid');
-												    // }
+    // if (!ObjectID.isValid(id)) {
+    //   console.log('ID not valid');
+    // }
 
-												    // // returns ARRAY
-												    // Todo.find({
-												    //   _id: id // mongoose take this string > convert to obj id > run query
-												    // }).then((todos) => {
-												    //   console.log('Todos', todos);
-												    // });
-												    //
-												    // // first matching doc from mongo
-												    // // returns OBJECT
-												    // Todo.findOne({
-												    //   _id: id // mongoose take this string > convert to obj id > run query
-												    // }).then((todo) => {
-												    //   console.log('Todo', todo);
-												    // });
+    // // returns ARRAY
+    // Todo.find({
+    //   _id: id // mongoose take this string > convert to obj id > run query
+    // }).then((todos) => {
+    //   console.log('Todos', todos);
+    // });
+    //
+    // // first matching doc from mongo
+    // // returns OBJECT
+    // Todo.findOne({
+    //   _id: id // mongoose take this string > convert to obj id > run query
+    // }).then((todo) => {
+    //   console.log('Todo', todo);
+    // });
 
-												    // Todo.findById(id).then((todo) => {
-												    //   if (!todo) {
-												    //     return console.log('Id not found');
-												    //   }
-												    //   console.log('Todo By Id', todo);
-												    // }).catch((e) => console.log(e));
-
-
-												    User.findById('5c31558e9e651b4307cef9af').then((user) => {
-												      if (!user) {
-												        return console.log('User not found');
-												      }
-												      // pretty print to console
-												      console.log(JSON.stringify(user, undefined, 2));
-												    }, (e) => {
-												      console.log(e);
-												    });
+    // Todo.findById(id).then((todo) => {
+    //   if (!todo) {
+    //     return console.log('Id not found');
+    //   }
+    //   console.log('Todo By Id', todo);
+    // }).catch((e) => console.log(e));
 
 
-												server/db/mongoose.js
-
-												    // config mongoose
-												    var mongoose = require('mongoose');
-
-												    mongoose.Promise = global.Promise;
-												    mongoose.connect('mongodb://localhost:27017/TodoApp');
-
-												    // module.exports = {
-												    //   mongoose: mongoose
-												    // };
-
-												    // mongoose variable
-												    module.exports = {mongoose};
+    User.findById('5c31558e9e651b4307cef9af').then((user) => {
+      if (!user) {
+        return console.log('User not found');
+      }
+      // pretty print to console
+      console.log(JSON.stringify(user, undefined, 2));
+    }, (e) => {
+      console.log(e);
+    });
 
 
+server/db/mongoose.js
 
-												server.js
+    // config mongoose
+    var mongoose = require('mongoose');
 
-												    var express = require('express');
-												    var bodyParser = require('body-parser');
-												    var {ObjectID} = require('mongodb');
+    mongoose.Promise = global.Promise;
+    mongoose.connect('mongodb://localhost:27017/TodoApp');
 
-												    var {mongoose} = require('./db/mongoose');
-												    var {Todo} = require('./models/todo');
-												    var {User} = require('./models/user');
+    // module.exports = {
+    //   mongoose: mongoose
+    // };
 
-												    var app = express();
-												    const port = process.env.PORT || 3000;
-
-												    app.use(bodyParser.json());
-
-												    app.post('/todos', (req, res) => {
-												    	var todo = new Todo({
-												    		text: req.body.text
-												    	});
-
-												    	todo.save().then((doc) => {
-												    		res.send(doc);
-												    	}, (e) => {
-												    		res.status(400).send(e);
-												    	});
-												    });
-
-												    app.get('/todos', (req, res) => {
-												    	Todo.find().then((todos) => {
-												    		res.send({todos});
-												    	}, (e) => {
-												    		res.status(400).send(e);
-												    	});
-												    });
-
-												    app.get('/todos/:id', (req, res) => {
-												    	var id = req.params.id;
-
-												    	if (!ObjectID.isValid(id)) {
-												    		return res.status(404).send();
-												    	}
-
-												    	Todo.findById(id).then((todo) => {
-												    	  if (!todo) {
-												    			return res.status(404).send();
-												    	  }
-
-												    		res.send({todo});
-												    	}).catch((e) => {
-												    		res.status(400).send();
-												    	});
-												    });
-
-												    app.listen(port, () => {
-												    	console.log(`Started on port ${port}`);
-												    });
-
-												    module.exports = {app};
+    // mongoose variable
+    module.exports = {mongoose};
 
 
 
-												mongoose.js
+server.js
 
-												    var mongoose = require('mongoose');
+    var express = require('express');
+    var bodyParser = require('body-parser');
+    var {ObjectID} = require('mongodb');
 
-												    mongoose.Promise = global.Promise;
-												    mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
+    var {mongoose} = require('./db/mongoose');
+    var {Todo} = require('./models/todo');
+    var {User} = require('./models/user');
 
-												    module.exports = {mongoose};
+    var app = express();
+    const port = process.env.PORT || 3000;
+
+    app.use(bodyParser.json());
+
+    app.post('/todos', (req, res) => {
+    	var todo = new Todo({
+    		text: req.body.text
+    	});
+
+    	todo.save().then((doc) => {
+    		res.send(doc);
+    	}, (e) => {
+    		res.status(400).send(e);
+    	});
+    });
+
+    app.get('/todos', (req, res) => {
+    	Todo.find().then((todos) => {
+    		res.send({todos});
+    	}, (e) => {
+    		res.status(400).send(e);
+    	});
+    });
+
+    app.get('/todos/:id', (req, res) => {
+    	var id = req.params.id;
+
+    	if (!ObjectID.isValid(id)) {
+    		return res.status(404).send();
+    	}
+
+    	Todo.findById(id).then((todo) => {
+    	  if (!todo) {
+    			return res.status(404).send();
+    	  }
+
+    		res.send({todo});
+    	}).catch((e) => {
+    		res.status(400).send();
+    	});
+    });
+
+    app.listen(port, () => {
+    	console.log(`Started on port ${port}`);
+    });
+
+    module.exports = {app};
+
+
+
+mongoose.js
+
+    var mongoose = require('mongoose');
+
+    mongoose.Promise = global.Promise;
+    mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
+
+    module.exports = {mongoose};
 
 
 
@@ -2178,3 +2178,92 @@ server/server.js
     });
 
     module.exports = {app};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 7; P: 83; 'Testing DELETE /todos/:id'
+//////////////////////////////////////////////////////////////////
+
+
+		server.test.js
+
+		    describe('DELETE /todos/:id', () => {
+		      // it 3 times
+		      it('should remove a todo', (done) => {
+		        // pass in id that exists in 'todos' collection it does get removed
+		        var hexId = todos[1]._id.toHexString();
+		        // send off request
+		        request(app)
+		          .delete(`/todos/${hexId}`)
+		        // assert some stuff about it
+		          .expect(200)
+		          .expect((res) => {
+		            //id is id above
+		            expect(res.body.todo._id).toBe(hexId);
+		          })
+		        // query db making sure todo was actually removed from 'todos' collection
+		          .end((err, res) => {
+		            if (err) {
+		              return done(err);
+		            }
+
+		            // make db query using findById hexId should get nothing back
+		            // todo var in .then call and ensure does not exist via toNotExist assertion
+		            // request to db fetch todos verifying one was added
+		            Todo.findById(hexId).then((todo) => {
+		              // expect(null).toNotExist();
+		              // except success arg instead of null
+		              expect(todo).toBeFalsy();
+		              done();
+		              // add a .catch case
+		            }).catch((e) => done(e));
+		          })
+		      });
+
+		      it('should return 404 if todo not found', (done) => {
+		        // code
+		        // make request use real objectId using toHexString method
+		        var hexId = new ObjectID().toHexString();
+		        // make sure you get a 404 back
+		        request(app)
+		          .delete(`/todos/${hexId}`)
+		            .expect(404)
+		            .end(done);
+		      });
+
+		      it('should return 404 if object id is invalid', (done) => {
+		        // verify that when we have invalid object id we get 404 back as expected
+		        // /todos/123 valid url but convert to object id fail get 404 back
+		        request(app)
+		          .delete('/todos/123abc')
+		            .expect(404)
+		            .end(done);
+		      });
+		    });

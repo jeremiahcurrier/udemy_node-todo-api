@@ -43,7 +43,9 @@ app.get('/todos/:id', (req, res) => {
 			return res.status(404).send();
 	  }
 
-		res.send(todo);
+		// res.send(todo);
+		// res.send({todo: todo});
+		res.send({todo}); // es6 syntax
 	}).catch((e) => {
 		res.status(400).send();
 	});
@@ -65,7 +67,9 @@ app.delete('/todos/:id', (req, res) => {
 			return res.status(404).send();
 		}
 			// if doc, send doc back with 200
-		res.send({todo});
+			// res.send(todo);
+			// res.send({todo: todo});
+			res.send({todo}); // es6 syntax
 		// error
 	}).catch((e) => {
 		// 400 with empty body
