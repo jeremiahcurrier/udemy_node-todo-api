@@ -115,6 +115,10 @@ S: 7; P: 86; 'Creating a test database'
 //////////////////////////////////////////////////////////////////
 
 
+process.env.NODE_ENV === 'production' // default (app on Heroku)
+process.env.NODE_ENV === 'development' // run app locally
+process.env.NODE_ENV === 'test' // run app through mocha
+
 server/config/config.js
 
   var env = process.env.NODE_ENV || 'development';
