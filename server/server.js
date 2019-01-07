@@ -1,6 +1,7 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -75,6 +76,37 @@ app.delete('/todos/:id', (req, res) => {
 		// 400 with empty body
 		res.status(400).send();
 	})
+});
+
+app.patch('/todos/:id', (req, res) => {
+	var id = req.params.id;
+	var body = _.pick(req.body, ['text', 'completed']); // has subset of things user passed to us and we only want to PICK some things for the user to be able to update.
+
+	if (!ObjectID.isValid(id)) {
+		return res.status(404).send();
+	}
+
+	// checking completed value and setting completedAt (timestamp or cleared)
+	if(_.isBoolean(body.completed) && body.completed) {
+		body.completedAt = new Date().getTime(); // num ms on midnight of jan 1st since 1970 epoch-epic
+	} else {
+		// not boolean and or not true
+		body.completed = false;
+		body.completedAt = null; // remove form db = null
+	}
+
+	// query to update db
+	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => { // use mongoDb operators (like incrementors or $set)
+		if (!todo) {
+			return res.status(404).send();
+		}
+
+		// res.send({todo: todo});
+		res.send({todo}); // es6 syntax
+		// success
+	}).catch((e) => {
+		res.status(400).send();
+	});
 });
 
 app.listen(port, () => {
