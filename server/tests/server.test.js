@@ -6,30 +6,14 @@ const {ObjectID} = require('mongodb');
 // local files
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user');
+const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
 
-
-// ADD SEED DATA
-// dummy todos
-const todos = [{
-  _id: new ObjectID(),
-  text: 'First test todo'
-}, {
-  _id: new ObjectID(),
-  text: 'Second test todo',
-  completed: true,
-  completedAt: 333
-}];
 
 
 // add TESTING LIFECYCLE METHOD
-beforeEach((done) => {
-  // run before every test case
-  // Todo.remove({}).then(() => done()); // wipe out our todos
-  // insertMany (takes array and inserts into collection)
-  Todo.remove({}).then(() => {
-    return Todo.insertMany(todos);
-  }).then(() => done());
-});
+beforeEach(populateUsers); // added before populateTodos
+beforeEach(populateTodos);
 
 // group all routes
 describe('POST /todos', () => {
@@ -223,6 +207,106 @@ describe('PATCH /todos/:id', () => {
         expect(res.body.todo.completed).toBe(false);
         expect(res.body.todo.completedAt).toBeFalsy();
       })
+      .end(done);
+  });
+});
+
+describe('GET /users/me', () => {
+  // valid auth token
+  it('should return user if authenticated', (done) => {
+    request(app)
+      .get('/users/me')
+      // SET a header
+      .set('x-auth', users[0].tokens[0].token)
+      // should get back a http 200
+      .expect(200)
+      // some things about the body
+      .expect((res) => {
+        // id in body should be id of user whose token we applied
+        expect(res.body._id).toBe(users[0]._id.toHexString());
+        expect(res.body.email).toBe(users[0].email);
+      })
+      // tack on a call to .end()
+      .end(done);
+  });
+  // invalid auth token
+  it('should return a 401 if not authenticated', (done) => {
+    // users/me route, same GET, no x-auth token, expect a 401, body = {} since user not authed, call .end(done); toEqual
+    request(app)
+      .get('/users/me')
+      .expect(401)
+      // some things about the body
+      .expect((res) => {
+        expect(res.body).toEqual({});
+      })
+      .end(done);
+  });
+});
+
+describe('POST /users', () => {
+  // 3 cases
+  it('should create a user', (done) => {
+    var email = 'example@example.com';
+    var password = '123mnb!';
+
+    request(app)
+      .post('/users')
+      // send some data
+      .send({email, password})
+      // what should happen?
+      // expect 200 status back
+      .expect(200)
+      // get x-auth token back
+      .expect((res) => {
+        // no errors expected
+        expect(res.headers['x-auth']).toBeTruthy();
+        expect(res.body._id).toBeTruthy();
+        expect(res.body.email).toBe(email);
+      })
+      // now we can call end
+      // .end(done);
+      // but instead of passing in done pass in a custom function to query the database
+      .end((err) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findOne({email}).then((user) => {
+          // make some assertions about the document in the DB
+          // toExist -> toBeTruthy
+          expect(user).toBeTruthy();
+          // toNotBe -> not.toBe
+          expect(user.password).not.toBe(password); // if equal then passwords not getting hashed = problem
+          done();
+        });
+      });
+  });
+
+  it('should return validation errors if request invalid', (done) => {
+    request(app)
+      .post('/users')
+      // send invalid email and invalid password
+      .send({
+        email: 'foo',
+        password: 'bar'
+      })
+    // expect 400
+      .expect(400)
+    // done
+      .end(done);
+  });
+
+  it('should not create a user if email in use', (done) => {
+    request(app)
+      .post('/users')
+    // email already taken (i.e. already in seed data)
+      .send({
+        email: users[0].email, // supposed to be VALID but already in use
+        password: 'Password123!' // valid format for password
+      })
+    // expect 400
+      .expect(400)
+    // done
       .end(done);
   });
 });

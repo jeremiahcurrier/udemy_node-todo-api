@@ -961,3 +961,262 @@ server/models/user.js
   var User = mongoose.model('User', UserSchema);
 
   module.exports = {User};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 93; 'Seeding Test Database with Users'
+//////////////////////////////////////////////////////////////////
+
+created server/tests/seed folder with ~/seed.js file
+
+  // imports
+  // load in the objectId from the mongoDB native driver
+  const {ObjectID} = require('mongodb'); // using es6 destructuring
+  const jwt = require('jsonwebtoken');
+
+  const {Todo} = require('./../../models/todo');
+  const {User} = require('./../../models/user');
+
+  const userOneId = new ObjectID();
+  const userTwoId = new ObjectID();
+  const users = [{
+    _id: userOneId,
+    email: 'andrew@example.com',
+    password: 'userOnePass',
+    tokens: [{
+      access: 'auth',
+      token: jwt.sign({_id: userOneId, access: 'auth'}, 'secretvalue').toString()
+    }]
+  }, {
+    _id: userTwoId,
+    email: 'jen@example.com',
+    password: 'userTwoPass'
+  }];
+
+  // ADD SEED DATA
+  // dummy todos
+  const todos = [{
+    _id: new ObjectID(),
+    text: 'First test todo'
+  }, {
+    _id: new ObjectID(),
+    text: 'Second test todo',
+    completed: true,
+    completedAt: 333
+  }];
+
+  const populateTodos = (done) => {
+    // run before every test case
+    // Todo.remove({}).then(() => done()); // wipe out our todos
+    // insertMany (takes array and inserts into collection)
+    Todo.remove({}).then(() => {
+      return Todo.insertMany(todos); // this does not run our middleware
+    }).then(() => done());
+  };
+
+  // we need to save the users AND ensure passwords are hashed
+  const populateUsers = (done) => {
+    User.remove({}).then(() => {
+      // add records
+      // var userOne = new User(users[0].save()); // returns a promise
+      // var userTwo = new User(users[1].save()); // returns a promise
+      // // we wanna wait for BOTH promises to finish
+      // // Promise.all([userOne, userTwo]).then(() => {
+      // //   // code
+      // // });
+      // return Promise.all([userOne, userTwo]);
+      return User.insertMany(users);
+    }).then(() => done());
+  };
+
+  // export
+  module.exports = {todos, populateTodos, users, populateUsers};
+
+
+
+
+
+
+Updated server.test.js file with this:
+
+  // require supertest and expect - nodemon and mocha do not need to be required that is not how they are used
+  const expect = require('expect');
+  const request = require('supertest');
+  // load in the objectId from the mongoDB native driver
+  const {ObjectID} = require('mongodb');
+  // local files
+  const {app} = require('./../server');
+  const {Todo} = require('./../models/todo');
+  const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
+
+
+
+  // add TESTING LIFECYCLE METHOD
+  beforeEach(populateUsers); // added before populateTodos
+  beforeEach(populateTodos);
+
+  ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 94; 'Testing POST /users and GET /users/me'
+//////////////////////////////////////////////////////////////////
+
+new describe blocks in server.test.js
+
+  describe('GET /users/me', () => {
+    // valid auth token
+    it('should return user if authenticated', (done) => {
+      request(app)
+        .get('/users/me')
+        // SET a header
+        .set('x-auth', users[0].tokens[0].token)
+        // should get back a http 200
+        .expect(200)
+        // some things about the body
+        .expect((res) => {
+          // id in body should be id of user whose token we applied
+          expect(res.body._id).toBe(users[0]._id.toHexString());
+          expect(res.body.email).toBe(users[0].email);
+        })
+        // tack on a call to .end()
+        .end(done);
+    });
+    // invalid auth token
+    it('should return a 401 if not authenticated', (done) => {
+      // users/me route, same GET, no x-auth token, expect a 401, body = {} since user not authed, call .end(done); toEqual
+      request(app)
+        .get('/users/me')
+        .expect(401)
+        // some things about the body
+        .expect((res) => {
+          expect(res.body).toEqual({});
+        })
+        .end(done);
+    });
+  });
+
+  describe('POST /users', () => {
+    // 3 cases
+    it('should create a user', (done) => {
+      var email = 'example@example.com';
+      var password = '123mnb!';
+
+      request(app)
+        .post('/users')
+        // send some data
+        .send({email, password})
+        // what should happen?
+        // expect 200 status back
+        .expect(200)
+        // get x-auth token back
+        .expect((res) => {
+          // no errors expected
+          expect(res.headers['x-auth']).toBeTruthy();
+          expect(res.body._id).toBeTruthy();
+          expect(res.body.email).toBe(email);
+        })
+        // now we can call end
+        // .end(done);
+        // but instead of passing in done pass in a custom function to query the database
+        .end((err) => {
+          if (err) {
+            return done(err);
+          }
+
+          User.findOne({email}).then((user) => {
+            // make some assertions about the document in the DB
+            // toExist -> toBeTruthy
+            expect(user).toBeTruthy();
+            // toNotBe -> not.toBe
+            expect(user.password).not.toBe(password); // if equal then passwords not getting hashed = problem
+            done();
+          });
+        });
+    });
+
+    it('should return validation errors if request invalid', (done) => {
+      request(app)
+        .post('/users')
+        // send invalid email and invalid password
+        .send({
+          email: 'foo',
+          password: 'bar'
+        })
+      // expect 400
+        .expect(400)
+      // done
+        .end(done);
+    });
+
+    it('should not create a user if email in use', (done) => {
+      request(app)
+        .post('/users')
+      // email already taken (i.e. already in seed data)
+        .send({
+          email: users[0].email, // supposed to be VALID but already in use
+          password: 'Password123!' // valid format for password
+        })
+      // expect 400
+        .expect(400)
+      // done
+        .end(done);
+    });
+  });
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 95; '-'
+//////////////////////////////////////////////////////////////////

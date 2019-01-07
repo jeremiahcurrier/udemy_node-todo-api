@@ -121,33 +121,12 @@ app.post('/users', (req, res) => {
 	user.save().then(() => {
 		return user.generateAuthToken(); // return since we're expecting a chaining promise
 	}).then((token) => {
-		// add token as http header and send token back
-		res.header('x-auth', token).send(user); // x- = custom header
+		res.header('x-auth', token).send(user);
 	}).catch((e) => {
 		res.status(400).send(e);
 	});
 });
 
-// // MIDDLEWARE function to use on all routes to make PRIVATE
-// var authenticate = (req, res, next) => {
-// 	var token = req.header('x-auth');
-//
-// 	User.findByToken(token).then((user) => {
-// 		if (!user) {
-// 			return Promise.reject(); // runs the error case in the catch below
-// 		}
-//
-// 		// res.send(user); //send back user
-// 		// modify request object to use inside a route
-// 		req.user = user;
-// 		req.token = token;
-// 		next();
-// 	}).catch((e) => {
-// 		res.status(401).send();
-// 	});
-// };
-
-// baby's first private route!
 app.get('/users/me', authenticate, (req, res) => {
 	res.send(req.user);
 });
