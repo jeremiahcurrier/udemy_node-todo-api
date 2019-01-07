@@ -15,7 +15,9 @@ const todos = [{
   text: 'First test todo'
 }, {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completedAt: 333
 }];
 
 
@@ -170,5 +172,57 @@ describe('DELETE /todos/:id', () => {
       .delete('/todos/123abc')
         .expect(404)
         .end(done);
+  });
+});
+
+describe('PATCH /todos/:id', () => {
+  // 2 test cases
+  // take our 1st todo and set text to something else and completed from false to true
+  it('should update the todo', (done) => {
+    // grab id of first item
+    var hexId = todos[0]._id.toHexString();
+    var text = 'This should be the new text';
+      // make request to express application
+      request(app)
+        .patch(`/todos/${hexId}`) // url with template string
+        .send({
+          // send data before making assertions
+          completed: true,
+          // text: text
+          text // es6
+        })
+        .expect(200) // assert 200
+        .expect((res) => {
+          expect(res.body.todo.text).toBe(text);
+          expect(res.body.todo.completed).toBe(true);
+          expect(typeof res.body.todo.completedAt).toBe('number');
+        })
+        // BEFORE CUSTOM ASSERTION - call end
+        .end(done);
+  });
+
+  // toggling that completed value for the second todo
+  it('should clear completedAt when todo is not completed', (done) => {
+    // grab id of second item
+    var hexId = todos[1]._id.toHexString();
+    var text = 'patched up real nice';
+    // make request to express application
+    request(app)
+      .patch(`/todos/${hexId}`)
+      // send the data before you can make the assertion about its response
+      .send({
+        text,
+        completed: false
+      })
+      // expect http 200 ok
+      .expect(200)
+      // custom assertion text changed, completed false, completedAt is null via .toNotExist
+      .expect((res) => {
+        // custom assertions here
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(false);
+        expect(res.body.todo.completedAt).toBeFalsy();
+      })
+      .end(done);
   });
 });
