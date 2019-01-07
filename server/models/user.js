@@ -62,6 +62,33 @@ UserSchema.methods.generateAuthToken = function () {
 	});
 };
 
+// define a model methods
+// .statics = object; everything added to it becomes MODEL method (vs INSTANCE method)
+UserSchema.statics.findByToken = function (token) {
+	var User = this; // the Model is the 'this' binding
+	var decoded; // stores decoded JWT values - return from jwt.verify in hashing.js
+	// we wanna try something and catch the error if present
+	try {
+		// if error stop executing > move to catch block > continue in program
+		decoded = jwt.verify(token, 'secretvalue');
+	} catch (e) {
+		// return new Promise((resolve, reject) => {
+		// 	reject();
+		// });
+		return Promise.reject();
+	}
+
+	// success case - decode token passed in as header
+	// return to add to chaining
+	return User.findOne({
+		// query our nested object properties
+		'_id': decoded._id, // quotes not required unless a . in the key
+		// find user whose 'tokens' array has object where token prop = token prop passed in
+		'tokens.token': token,
+		'tokens.access': 'auth'
+	});
+};
+
 var User = mongoose.model('User', UserSchema);
 
 module.exports = {User};
