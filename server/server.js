@@ -117,9 +117,12 @@ app.post('/users', (req, res) => {
 	var body = _.pick(req.body, ['email', 'password']);
 	var user = new User(body);
 
-	user.save().then((user) => {
-		res.send(user);
-	}, (e) => {
+	user.save().then(() => {
+		return user.generateAuthToken(); // return since we're expecting a chaining promise
+	}).then((token) => {
+		// add token as http header and send token back
+		res.header('x-auth', token).send(user); // x- = custom header
+	}).catch((e) => {
 		res.status(400).send(e);
 	});
 });
