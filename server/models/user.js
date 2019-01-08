@@ -28,7 +28,7 @@ var UserSchema = new mongoose.Schema({
 		},
 		token: {
 			type: String,
-			require: true
+			required: true
 		}
 	}]
 });
@@ -65,31 +65,38 @@ UserSchema.methods.generateAuthToken = function () {
 
 // define MODEL methods
 UserSchema.statics.findByCredentials = function (email, password) {
-	// find user that does have email of email passed in
-	var User = this;
+  var User = this;
 
-	return User.findOne({email}).then((user) => {
-		if (!user) {
-			// return a rejected promise
-			return Promise.reject();
-		}
+  return User.findOne({email}).then((user) => {
+    if (!user) {
+      return Promise.reject();
+    }
 
-		// user does exist - no promise support in b-crypt...
-		// bcrypt.compare
-		return new Promise((resolve, reject) => {
-			// use bcrypt.compare to compare password in arg with user.password so in server.js we can do something with user when they come back
-			// User bcrypt.compare to compare password and user.password
-			bcrypt.compare(password, user.password, (err, res) => {
-				if (res) {
-					// if result = true you found user call resolve(user);
-					return resolve(user);
-				} else {
-					// if result = false - call reject to trigger catch case in server.js
-					return reject(); // no need to send anything back
-				}
-			});
-		})
-	})
+    return new Promise((resolve, reject) => {
+			console.log('\n--------------debug-start:');
+			console.log('password');
+			console.log(password);
+			console.log('user.password');
+			console.log(user.password);
+			console.log('\n--------------debug-end');
+      // Use bcrypt.compare to compare password and user.password
+      bcrypt.compare(password, user.password, (err, res) => {
+				console.log('\n--------------debug-INNER-start:');
+				console.log('res:\n');
+				console.log(res);
+				console.log('err:\n');
+				console.log(err);
+				console.log('user:\n');
+				console.log(user);
+				console.log('\n--------------debug-INNER-end:');
+        if (res) {
+          resolve(user);
+        } else {
+          reject();
+        }
+      });
+    });
+  });
 };
 
 // .statics = object; everything added to it becomes MODEL method (vs INSTANCE method)
