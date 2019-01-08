@@ -63,7 +63,35 @@ UserSchema.methods.generateAuthToken = function () {
 	});
 };
 
-// define a model methods
+// define MODEL methods
+UserSchema.statics.findByCredentials = function (email, password) {
+	// find user that does have email of email passed in
+	var User = this;
+
+	return User.findOne({email}).then((user) => {
+		if (!user) {
+			// return a rejected promise
+			return Promise.reject();
+		}
+
+		// user does exist - no promise support in b-crypt...
+		// bcrypt.compare
+		return new Promise((resolve, reject) => {
+			// use bcrypt.compare to compare password in arg with user.password so in server.js we can do something with user when they come back
+			// User bcrypt.compare to compare password and user.password
+			bcrypt.compare(password, user.password, (err, res) => {
+				if (res) {
+					// if result = true you found user call resolve(user);
+					return resolve(user);
+				} else {
+					// if result = false - call reject to trigger catch case in server.js
+					return reject(); // no need to send anything back
+				}
+			});
+		})
+	})
+};
+
 // .statics = object; everything added to it becomes MODEL method (vs INSTANCE method)
 UserSchema.statics.findByToken = function (token) {
 	var User = this; // the Model is the 'this' binding
