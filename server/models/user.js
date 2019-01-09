@@ -73,22 +73,22 @@ UserSchema.statics.findByCredentials = function (email, password) {
     }
 
     return new Promise((resolve, reject) => {
-			console.log('\n--------------debug-start:');
-			console.log('password');
-			console.log(password);
-			console.log('user.password');
-			console.log(user.password);
-			console.log('\n--------------debug-end');
+			// console.log('\n--------------debug-start:');
+			// console.log('password');
+			// console.log(password);
+			// console.log('user.password');
+			// console.log(user.password);
+			// console.log('\n--------------debug-end');
       // Use bcrypt.compare to compare password and user.password
       bcrypt.compare(password, user.password, (err, res) => {
-				console.log('\n--------------debug-INNER-start:');
-				console.log('res:\n');
-				console.log(res);
-				console.log('err:\n');
-				console.log(err);
-				console.log('user:\n');
-				console.log(user);
-				console.log('\n--------------debug-INNER-end:');
+				// console.log('\n--------------debug-INNER-start:');
+				// console.log('res:\n');
+				// console.log(res);
+				// console.log('err:\n');
+				// console.log(err);
+				// console.log('user:\n');
+				// console.log(user);
+				// console.log('\n--------------debug-INNER-end:');
         if (res) {
           resolve(user);
         } else {
@@ -128,6 +128,7 @@ UserSchema.statics.findByToken = function (token) {
 UserSchema.pre('save', function(next) { // save is Mongoose document save event
 	// do something
 	var user = this;
+
 	// now we can check if password was modified
 	if (user.isModified('password')) {
 		// hash the password using bcrypt if not modified

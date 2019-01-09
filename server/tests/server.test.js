@@ -323,7 +323,7 @@ describe('POST /users/login', () => {
         })
         .expect(200) // Error: expected 200 "OK", got 400 "Bad Request"
         .expect((res) => {
-          expect(res.headers['x-auth']).toExist();
+          expect(res.headers['x-auth']).toBeTruthy();
         })
         .end((err, res) => {
           if (err) {
