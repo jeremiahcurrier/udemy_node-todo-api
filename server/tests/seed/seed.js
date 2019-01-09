@@ -35,26 +35,17 @@ const todos = [{
 }];
 
 const populateTodos = (done) => {
-  // run before every test case
-  // Todo.remove({}).then(() => done()); // wipe out our todos
-  // insertMany (takes array and inserts into collection)
   Todo.remove({}).then(() => {
-    return Todo.insertMany(todos); // this does not run our middleware
+    return Todo.insertMany(todos);
   }).then(() => done());
 };
 
-// we need to save the users AND ensure passwords are hashed
 const populateUsers = (done) => {
   User.remove({}).then(() => {
-    // add records
-    // var userOne = new User(users[0].save()); // returns a promise
-    // var userTwo = new User(users[1].save()); // returns a promise
-    // // we wanna wait for BOTH promises to finish
-    // // Promise.all([userOne, userTwo]).then(() => {
-    // //   // code
-    // // });
-    // return Promise.all([userOne, userTwo]);
-    return User.insertMany(users);
+    var userOne = new User(users[0]).save();
+    var userTwo = new User(users[1]).save();
+
+    return Promise.all([userOne, userTwo])
   }).then(() => done());
 };
 
