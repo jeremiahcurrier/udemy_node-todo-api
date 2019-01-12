@@ -73,22 +73,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
     }
 
     return new Promise((resolve, reject) => {
-			// console.log('\n--------------debug-start:');
-			// console.log('password');
-			// console.log(password);
-			// console.log('user.password');
-			// console.log(user.password);
-			// console.log('\n--------------debug-end');
-      // Use bcrypt.compare to compare password and user.password
       bcrypt.compare(password, user.password, (err, res) => {
-				// console.log('\n--------------debug-INNER-start:');
-				// console.log('res:\n');
-				// console.log(res);
-				// console.log('err:\n');
-				// console.log(err);
-				// console.log('user:\n');
-				// console.log(user);
-				// console.log('\n--------------debug-INNER-end:');
         if (res) {
           resolve(user);
         } else {
@@ -97,6 +82,23 @@ UserSchema.statics.findByCredentials = function (email, password) {
       });
     });
   });
+};
+
+UserSchema.methods.removeToken = function (token) {
+	// passing the token in to delete it
+	// call the update method to update our array
+	// we have an array of tokens defined in the UserScheme above - we want to remove any object from from the tokens array that has a 'token' property equal to the value we send in. We'll use a mongoDB 'operator' $pull to remove items from an array that match certain criteria.
+	var user = this; // lower case user because this is an instance method
+	return user.update({ // 'return' so we can chain this call
+		$pull: {
+			// set equal to an object
+			// define here what to pull from
+			// tokens: {
+			// 	token: token // will remove entire object / not just the token
+			// }
+			tokens: {token} // prop name === var name 
+		}
+	});
 };
 
 // .statics = object; everything added to it becomes MODEL method (vs INSTANCE method)
