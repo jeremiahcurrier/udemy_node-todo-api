@@ -59,6 +59,7 @@ UserSchema.methods.generateAuthToken = function () {
 
 	// in order to allow server.js to chain onto the promise we'll return interval
 	return user.save().then(() => {
+		// make sure you're testing with the right email address
 		return token;
 	});
 };
