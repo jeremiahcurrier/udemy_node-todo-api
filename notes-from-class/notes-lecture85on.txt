@@ -1652,3 +1652,57 @@ todo-api[jeremiah]-$ heroku config
 MONGODB_URI: mongodb://heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri@ds149984.mlab.com:49984/heroku_q4cwl4jq
 
 todo-api[jeremiah]-$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 102; 'Deploying to Heroku'
+//////////////////////////////////////////////////////////////////
+
+
+robo
+
+todo-api[jeremiah]-$ heroku config:get MONGODB_URI
+mongodb://heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri@ds149984.mlab.com:49984/heroku_q4cwl4jq
+
+todo-api[jeremiah]-$
+
+
+put this create a new connection in the robo app
+
+"mongodb://heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri@ds149984.mlab.com:49984/heroku_q4cwl4jq"
+  "mongodb://" = protocol
+  "heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri" = username:password
+  "ds149984.mlab.com" = url address
+  "49984" = port
+  "heroku_q4cwl4jq" = the database
+
+used robo app
+connected (via test)
+dropped the told stale todos
+now we can deploy to heroku
