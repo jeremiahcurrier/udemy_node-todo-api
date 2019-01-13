@@ -1436,3 +1436,66 @@ server/tests/server.test.js
   });
 
 ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 99; 'Making Todo routes private pt 1'
+//////////////////////////////////////////////////////////////////
+
+add the 'authenticate' middleware to a few routes so we have access to the user and their _creator property which was added to the todos schema
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 100; 'Making Todo routes private pt 2'
+//////////////////////////////////////////////////////////////////
+
+routes
+  get by id
+  delete by id
+  patch by id
+
+add 'authenticate' middleware
+update our query to take advantage of our new _creator property
+update our test cases

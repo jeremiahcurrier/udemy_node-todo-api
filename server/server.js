@@ -16,13 +16,12 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-// w/ authenticate you have access to user and tokens
-
-// app.post('/todos', authenticate, (req, res) => {
-app.post('/todos', (req, res) => {
+// w the 'authenticate' middleware added to the route
+app.post('/todos', authenticate, (req, res) => {
+// app.post('/todos', (req, res) => {
 	var todo = new Todo({
 		text: req.body.text,
-		// _creator: req.user._id // id of the user
+		_creator: req.user._id // id of the user
 	});
 
 	todo.save().then((doc) => {
@@ -32,9 +31,12 @@ app.post('/todos', (req, res) => {
 	});
 });
 
-app.get('/todos', (req, res) => {
-// app.get('/todos', authenticate, (req, res) => {
-	Todo.find().then((todos) => {
+// w/the 'authenticate' middleware (requiring an 'x-auth' header to fetch todos)
+app.get('/todos', authenticate, (req, res) => {
+// app.get('/todos', (req, res) => {
+	Todo.find({
+		_creator: req.user._id
+	}).then((todos) => {
 		res.send({todos});
 	}, (e) => {
 		res.status(400).send(e);
@@ -50,14 +52,18 @@ app.get('/todos', (req, res) => {
 	// });
 });
 
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
 	var id = req.params.id;
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
 	}
 
-	Todo.findById(id).then((todo) => {
+	// Todo.findById(id).then((todo) => {
+	Todo.findOne({
+		_id: id,
+		_creator: req.user._id
+	}).then((todo) => {
 	  if (!todo) {
 			return res.status(404).send();
 	  }
@@ -70,7 +76,7 @@ app.get('/todos/:id', (req, res) => {
 	});
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
 	// get the id
 	var id = req.params.id;
 	// validate the id -> not valid? return 404
@@ -78,7 +84,11 @@ app.delete('/todos/:id', (req, res) => {
 		return res.status(404).send();
 	}
 	// remove todo by id
-	Todo.findByIdAndRemove(id).then((todo) => {
+	// Todo.findByIdAndRemove(id).then((todo) => {
+	Todo.findOneAndRemove({
+		_id: id,
+		_creator: req.user._id
+	}).then((todo) => {
 	  // console.log(todo);
 		// success
 		if (!todo) {
@@ -96,7 +106,7 @@ app.delete('/todos/:id', (req, res) => {
 	})
 });
 
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
 	var id = req.params.id;
 	var body = _.pick(req.body, ['text', 'completed']); // has subset of things user passed to us and we only want to PICK some things for the user to be able to update.
 
@@ -114,17 +124,29 @@ app.patch('/todos/:id', (req, res) => {
 	}
 
 	// query to update db
-	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => { // use mongoDb operators (like incrementors or $set)
+	// findOneAndUpdate
+
+	Todo.findOneAndUpdate({_id: id, _creator: req.user._id}, {$set: body}, {new: true}).then((todo) => {
 		if (!todo) {
 			return res.status(404).send();
 		}
 
-		// res.send({todo: todo});
-		res.send({todo}); // es6 syntax
-		// success
+		res.send({todo});
 	}).catch((e) => {
 		res.status(400).send();
-	});
+	})
+
+	// Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => { // use mongoDb operators (like incrementors or $set)
+	// 	if (!todo) {
+	// 		return res.status(404).send();
+	// 	}
+	//
+	// 	// res.send({todo: todo});
+	// 	res.send({todo}); // es6 syntax
+	// 	// success
+	// }).catch((e) => {
+	// 	res.status(400).send();
+	// });
 });
 
 // POST to /users same for creating new todos
@@ -146,32 +168,10 @@ app.get('/users/me', authenticate, (req, res) => {
 });
 
 
-	// // POST /users/login {email, password}
-	// // pick off these from request body res.send(body) data
-	// // make login call with email password and get that back
-	// app.post('/users/login', (req, res) => {
-	// 	// YOU HAVE TO ALREADY EXIST BY EMAIL
-	// 	var body = _.pick(req.body, ['email', 'password']);
-	// 	// res.send(body);
-	// 	User.findByCredentials(body.email, body.password).then((user) => {
-	// 		// res.send(user);
-	// 		console.log('main');
-	// 		// 'return' to keep the chain alive
-	// 		return user.generateAuthToken().then((token) => {
-	// 			res.header('x-auth', token).send(user);
-	// 		});
-	// 	}).catch((e) => {
-	// 		console.log('catch');
-	// 		// not able to login
-	// 		res.status(400).send(e);
-	// 	});
-	// });
-
 app.post('/users/login', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
 
   User.findByCredentials(body.email, body.password).then((user) => {
-		console.log('user');
     return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
     });
