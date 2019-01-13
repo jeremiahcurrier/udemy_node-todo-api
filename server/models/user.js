@@ -44,7 +44,7 @@ UserSchema.methods.toJSON = function() {
 UserSchema.methods.generateAuthToken = function () {
 	var user = this;
 	var access = 'auth';
-	var token = jwt.sign({_id: user._id.toHexString(), access}, 'secretvalue').toString();
+	var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
 
 	// user.tokens.push({access, token});
 	user.tokens = user.tokens.concat([{access, token}]); // works in wider range of mongodb versions
@@ -108,7 +108,7 @@ UserSchema.statics.findByToken = function (token) {
 	// we wanna try something and catch the error if present
 	try {
 		// if error stop executing > move to catch block > continue in program
-		decoded = jwt.verify(token, 'secretvalue');
+		decoded = jwt.verify(token, process.env.JWT_SECRET);
 	} catch (e) {
 		// return new Promise((resolve, reject) => {
 		// 	reject();
