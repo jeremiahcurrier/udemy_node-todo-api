@@ -363,3 +363,37 @@ describe('POST /users/login', () => {
       });
   });
 });
+
+// pass in route signature
+describe('DELETE /users/me/token', () => {
+  // make sure when real valid x-auth token is passed along to the logout method it actually gets logged out
+  it('should remove auth token on logout', (done) => {
+    // we need seed data
+    request(app)
+    // DELETE /users/me/token
+      .delete('/users/me/token')
+    // Set x-auth to token in tokens array
+      .set('x-auth', users[0].tokens[0].token)
+    // some assertions
+    // expect 200 back
+      .expect(200)
+    // add async .end() call to make an async assertion
+    // find user, verify that tokens array has length of 0
+      .end((err, res) => {
+        // handle the error
+        if (err) {
+          return done(err); // pass error to done function
+        }
+        // query our database
+        User.findById(users[1]._id).then((user) => {
+          // assertion
+          expect(user.tokens.length).toBe(0);
+          done();
+        }).catch((e) => done(e));
+      // }).catch((e) => {
+      //   done(e);
+      // });
+      });
+
+  });
+});

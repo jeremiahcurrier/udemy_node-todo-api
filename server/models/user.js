@@ -96,7 +96,7 @@ UserSchema.methods.removeToken = function (token) {
 			// tokens: {
 			// 	token: token // will remove entire object / not just the token
 			// }
-			tokens: {token} // prop name === var name 
+			tokens: {token} // prop name === var name
 		}
 	});
 };

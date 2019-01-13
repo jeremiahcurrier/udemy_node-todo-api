@@ -1299,3 +1299,140 @@ server/models/user.js
     	})
     };
     ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 97; 'Logging out DELETE /users/me/token'
+//////////////////////////////////////////////////////////////////
+
+server/models/user.js
+
+...
+
+  UserSchema.methods.removeToken = function (token) {
+  	// passing the token in to delete it
+  	// call the update method to update our array
+  	// we have an array of tokens defined in the UserScheme above - we want to remove any object from from the tokens array that has a 'token' property equal to the value we send in. We'll use a mongoDB 'operator' $pull to remove items from an array that match certain criteria.
+  	var user = this; // lower case user because this is an instance method
+  	return user.update({ // 'return' so we can chain this call
+  		$pull: {
+  			// set equal to an object
+  			// define here what to pull from
+  			// tokens: {
+  			// 	token: token // will remove entire object / not just the token
+  			// }
+  			tokens: {token} // prop name === var name
+  		}
+  	});
+  };
+
+...
+
+
+server/server.js
+
+...
+
+  // call to log out a user (requires auth) + remove token from tokens array
+  // it is a DELETE route since we're trying to remove something
+  // register it with a .delete()
+  // make route private (auth required to run code) and remember in our authentication middleware we're storing the token to grab out later
+  app.delete('/users/me/token', authenticate, (req, res) => {
+  	// delete the token that was used inside the 'authentication' middleware
+  	// to actually remove the token we will use a method - to define that method - an instance method - we have access to the user from the request so we'll call an instance method on the req.user
+  	// ideally it returns a promise so we can respond to the user when the token is deleted
+  	// define the removeToken() instance method inside of user.js
+  	req.user.removeToken(req.token).then(() => {
+  		// respond to user now that token is deleted
+  		// 1st callback to then()
+  		res.status(200).send();
+  	}, () => {
+  		// 2nd callback to then()
+  		// if things do not go well for some reason
+  		res.status(400).send();
+  	})
+  });
+
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 98; 'Testing DELETE /users/me/token'
+//////////////////////////////////////////////////////////////////
+
+server/tests/server.test.js
+
+...
+
+  // pass in route signature
+  describe('DELETE /users/me/token', () => {
+    // make sure when real valid x-auth token is passed along to the logout method it actually gets logged out
+    it('should remove auth token on logout', (done) => {
+      // we need seed data
+      request(app)
+      // DELETE /users/me/token
+        .delete('/users/me/token')
+      // Set x-auth to token in tokens array
+        .set('x-auth', users[0].tokens[0].token)
+      // some assertions
+      // expect 200 back
+        .expect(200)
+      // add async .end() call to make an async assertion
+      // find user, verify that tokens array has length of 0
+        .end((err, res) => {
+          // handle the error
+          if (err) {
+            return done(err); // pass error to done function
+          }
+          // query our database
+          User.findById(users[1]._id).then((user) => {
+            // assertion
+            expect(user.tokens.length).toBe(0);
+            done();
+          }).catch((e) => done(e));
+        // }).catch((e) => {
+        //   done(e);
+        // });
+        });
+
+    });
+  });
+
+...

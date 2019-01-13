@@ -16,9 +16,13 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+// w/ authenticate you have access to user and tokens
+
+// app.post('/todos', authenticate, (req, res) => {
 app.post('/todos', (req, res) => {
 	var todo = new Todo({
-		text: req.body.text
+		text: req.body.text,
+		// _creator: req.user._id // id of the user
 	});
 
 	todo.save().then((doc) => {
@@ -29,11 +33,21 @@ app.post('/todos', (req, res) => {
 });
 
 app.get('/todos', (req, res) => {
+// app.get('/todos', authenticate, (req, res) => {
 	Todo.find().then((todos) => {
 		res.send({todos});
 	}, (e) => {
 		res.status(400).send(e);
 	});
+
+	// Todo.find({
+	// 	// only todos that this user created
+	// 	_creator: req.user._id
+	// }).then((todos) => {
+	// 	res.send({todos});
+	// }, (e) => {
+	// 	res.status(400).send(e);
+	// });
 });
 
 app.get('/todos/:id', (req, res) => {
@@ -171,10 +185,6 @@ app.post('/users/login', (req, res) => {
 // register it with a .delete()
 // make route private (auth required to run code) and remember in our authentication middleware we're storing the token to grab out later
 app.delete('/users/me/token', authenticate, (req, res) => {
-	// delete the token that was used inside the 'authentication' middleware
-	// to actually remove the token we will use a method - to define that method - an instance method - we have access to the user from the request so we'll call an instance method on the req.user
-	// ideally it returns a promise so we can respond to the user when the token is deleted
-	// define the removeToken() instance method inside of user.js
 	req.user.removeToken(req.token).then(() => {
 		// respond to user now that token is deleted
 		// 1st callback to then()
