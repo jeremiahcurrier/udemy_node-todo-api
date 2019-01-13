@@ -1499,3 +1499,156 @@ routes
 add 'authenticate' middleware
 update our query to take advantage of our new _creator property
 update our test cases
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+S: 8; P: 101; 'Improving app configuration'
+//////////////////////////////////////////////////////////////////
+
+1. a better way to store local env vars
+2. storing custom env var in Heroku
+
+1
+it is a bad idea to have config variables as part of your git repository
+
+only dev and test env files are set locally
+
+************************
+  'production' env vars will be configured in Heroku (via CLI tools or the Web App)
+************************
+
+... pick up here tomorrow morning - finish section 8 > skip to section 10 to learn async/await
+
+- now you will need to do section 9 idk when - but that is all that will be left for this node.js class!
+
+you can then move on to IDEO (then linux sysadmin? more node.js? personal website? portfolio?)
+
+==========
+
+
+LOCAL
+
+server/config/config.json
+
+  {
+    "test": {
+      "PORT": 3000,
+      "MONGODB_URI": "mongodb://127.0.0.1:27017/TodoAppTest",
+      "JWT_SECRET": "jtkrcnidegckfthejbbnneitdvbegdvidftclgijnib-test"
+    },
+    "development": {
+      "PORT": 3000,
+      "MONGODB_URI": "mongodb://localhost:27017/TodoApp",
+      "JWT_SECRET": "jtkrcnidegckfthejbbnneitdvbegdvidftclgijnib-dev"
+    }
+  }
+
+sever/config/config.js
+
+  var env = process.env.NODE_ENV || 'development';
+
+  if (env === 'development' || env === 'test') {
+  	// load in json file that will not be part of git repository
+  	// how do we get the values in the ~/config.json ?
+  	// require json file which auto parses (deserializes) into json object
+  	var config = require('./config.json'); // need to add json extension
+  	var envConfig = config[env];
+
+  	// Object.keys(envConfig); // returns array of items in object
+
+  	// loop over an array of items
+  	Object.keys(envConfig).forEach((key) => {
+  		process.env[key] = envConfig[key]; // handles PORT and MONGODB_URI
+  	});
+  }
+
+server/models/tests/seed/seed.js
+
+  ...
+
+  const users = [{
+    _id: userOneId,
+    email: 'andrew@example.com',
+    password: 'userOnePass',
+    tokens: [{
+      access: 'auth',
+      token: jwt.sign({_id: userOneId, access: 'auth'}, process.env.JWT_SECRET).toString()
+    }]
+  }, {
+    _id: userTwoId,
+    email: 'jen@example.com',
+    password: 'userTwoPass',
+    tokens: [{
+      access: 'auth',
+      token: jwt.sign({_id: userTwoId, access: 'auth'}, process.env.JWT_SECRET).toString()
+    }]
+  }];
+
+  ...
+
+and updated 'secretvalue' to be new val from config.json in server/models/user.js
+
+validated in Postman
+
+
+
+
+
+
+
+PRODUCTION
+Terminal
+
+todo-api[jeremiah]-$ heroku config
+=== damp-harbor-26950 Config Vars
+MONGODB_URI: mongodb://heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri@ds149984.mlab.com:49984/heroku_q4cwl4jq
+
+todo-api[jeremiah]-$ heroku config:set NAME=Jeremiah
+Setting NAME and restarting ⬢ damp-harbor-26950... done, v9
+NAME: Jeremiah
+
+todo-api[jeremiah]-$ heroku config
+=== damp-harbor-26950 Config Vars
+MONGODB_URI: mongodb://heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri@ds149984.mlab.com:49984/heroku_q4cwl4jq
+NAME:        Jeremiah
+
+todo-api[jeremiah]-$ heroku config:get NAME
+Jeremiah
+
+todo-api[jeremiah]-$ heroku config:unset NAME
+Unsetting NAME and restarting ⬢ damp-harbor-26950... done, v10
+
+todo-api[jeremiah]-$ heroku config
+=== damp-harbor-26950 Config Vars
+MONGODB_URI: mongodb://heroku_q4cwl4jq:gbn6hduubb5dc31uem41e8iri@ds149984.mlab.com:49984/heroku_q4cwl4jq
+
+todo-api[jeremiah]-$
