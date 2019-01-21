@@ -63,7 +63,7 @@ app.use(bodyParser.json());
 	hbs.registerHelper('screamIt', (text) => {
 		return text.toUpperCase();
 	});
-
+	
 	app.get('/', (req, res) => {
 		res.render('home.hbs', {
 			pageTitle: 'Home page',
@@ -91,9 +91,9 @@ app.use(bodyParser.json());
 	//  Handling non-existing routes   //////
 	/////////////////////////////////////////
 		/* comment this out during `npm test` */
-	app.get('*', function(req, res) {
-	  res.render('error.hbs');
-	});
+	// app.get('*', function(req, res) {
+	//   res.render('error.hbs');
+	// });
 
 
 ////////////////////////////////////////////////////
