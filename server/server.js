@@ -5,21 +5,96 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
+const hbs = require('hbs');
+const fs = require('fs');
+
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 var {authenticate} = require('./middleware/authenticate');
 
 var app = express();
-	/* port set on Heroku for prod,
-	locally for dev, and final env = test */
+	/* port set on Heroku for prod, locally for dev, and final env = test */
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-	res.send('Todo API');
-});
+
+	///////////////////////////////////////////
+	//////// web server - static files ////////
+	///////////////////////////////////////////
+		/* If your project is within a subfolder and NOT in a root folder, you must add app.set('views', __dirname + '/views'); So the deploy tool known as heroku will not fail while deploying views in subfolders. */
+
+		/* tell express what is our view engine: handlebars */
+	app.set('view engine', 'hbs');
+		/* register views folder: important when your project is within a subfolder */
+	app.set('views', __dirname + '/views');
+		/* support to partial views */
+	hbs.registerPartials(__dirname + '/views/partials');
+
+		/* writes to a log file */
+	// app.use((req, res, next) => {
+	// 	var now = new Date().toString();
+	// 	var log = `${now}: ${req.method} ${req.url}`;
+	// 	console.log(log);
+	// 	// // old fs
+	// 	// fs.appendFile('server.log', log + '\n');
+	// 	// new fs
+	// 	fs.appendFile('server.log', log + '\n', (err) => {
+	// 		if (err) {
+	// 			console.log('Unable to append to server.log')
+	// 		}
+	// 	});
+	// 	next();
+	// });
+
+		/* check if we're in maintenance mode */
+	// app.use((req, res, next) => {
+	// 	res.render('maintenance.hbs');
+	// 	// next();
+	// 	/* you can just leave next() commented
+	// 	while you are doing maintenance */
+	// });
+
+	hbs.registerHelper('getCurrentYear', () => {
+		return new Date().getFullYear();
+	});
+
+	hbs.registerHelper('screamIt', (text) => {
+		return text.toUpperCase();
+	});
+
+	app.get('/', (req, res) => {
+		res.render('home.hbs', {
+			pageTitle: 'Home page',
+			welcomeMessage: 'Todo list API.'
+		});
+	});
+
+	app.get('/about', (req, res) => {
+		res.render('about.hbs', {
+			pageTitle: 'About page'
+		});
+	});
+
+	app.get('/projects', (req, res) => {
+		res.render('projects.hbs', {
+			pageTitle: 'Projects'
+		});
+	});
+
+	/////////////////////////////////////////
+	//  Handling non-existing routes   //////
+	/////////////////////////////////////////
+		/* comment this out during `npm test` */
+	app.get('*', function(req, res) {
+	  res.render('error.hbs');
+	});
+
+
+////////////////////////////////////////////////////
+///////////////  All other routes   ////////////////
+////////////////////////////////////////////////////
 
 ////////////////////////
 // callbacks/promises //
