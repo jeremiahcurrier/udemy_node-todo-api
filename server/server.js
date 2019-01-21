@@ -83,6 +83,10 @@ app.use(bodyParser.json());
 		});
 	});
 
+	app.get('/lindsey', function(req, res) {
+	  res.render('lindsey.hbs');
+	});
+
 	/////////////////////////////////////////
 	//  Handling non-existing routes   //////
 	/////////////////////////////////////////
