@@ -63,7 +63,7 @@ app.use(bodyParser.json());
 	hbs.registerHelper('screamIt', (text) => {
 		return text.toUpperCase();
 	});
-	
+
 	app.get('/', (req, res) => {
 		res.render('home.hbs', {
 			pageTitle: 'Home page',
@@ -78,9 +78,10 @@ app.use(bodyParser.json());
 	});
 
 	app.get('/projects', (req, res) => {
-		res.render('projects.hbs', {
-			pageTitle: 'Projects'
-		});
+		// res.render('projects.hbs', {
+		// 	pageTitle: 'Projects'
+		// });
+		res.render('error.hbs');
 	});
 
 	app.get('/lindsey', function(req, res) {
@@ -320,17 +321,17 @@ app.patch('/todos/:id', authenticate, async (req, res) => {
 // callbacks/promises //
 ////////////////////////
 	/* POST to /users same for creating new todos */
-// app.post('/users', (req, res) => {
-// 	var body = _.pick(req.body, ['email', 'password']);
-// 	var user = new User(body);
-// 	user.save().then(() => {
-// 		return user.generateAuthToken();
-// 	}).then((token) => {
-// 		res.header('x-auth', token).send(user);
-// 	}).catch((e) => {
-// 		res.status(400).send(e);
-// 	});
-// });
+app.post('/users', (req, res) => {
+	var body = _.pick(req.body, ['email', 'password']);
+	var user = new User(body);
+	user.save().then(() => {
+		return user.generateAuthToken();
+	}).then((token) => {
+		res.header('x-auth', token).send(user);
+	}).catch((e) => {
+		res.status(400).send(e);
+	});
+});
 ////////////////////////
 ////  async/await  /////
 ////////////////////////
